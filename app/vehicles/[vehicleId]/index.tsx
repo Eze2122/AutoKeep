@@ -16,7 +16,7 @@ export default function VehicleDashboard() {
   const vehicleId = Array.isArray(params.vehicleId) ? params.vehicleId[0] : params.vehicleId;
   return <View style={styles.container}>
     <Text style={styles.brand}>AutoKeep</Text><Text style={styles.title}>{t("Panel del vehículo")}</Text>
-    <Text style={styles.caption}>Vehículo: {vehicleId}</Text>
+    <Text style={styles.caption}>{t("Vehículo: ")}{vehicleId}</Text>
     {sections.map((item) => <Link key={item.route} href={`/vehicles/${vehicleId}/${item.route}`} asChild>
       <Pressable style={styles.card}><Text style={styles.icon}>{item.icon}</Text><View style={{ flex: 1 }}><Text style={styles.cardTitle}>{item.title}</Text><Text style={styles.caption}>{item.subtitle}</Text></View></Pressable>
     </Link>)}
