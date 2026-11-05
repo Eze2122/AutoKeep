@@ -34,4 +34,9 @@ export async function updateVehicle(vehicle: Vehicle): Promise<void> {
 export async function deleteVehicle(vehicleId: string): Promise<void> {
   const vehicles = await getVehicles();
   await AsyncStorage.setItem(VEHICLES_KEY, JSON.stringify(vehicles.filter((item) => item.id !== vehicleId)));
+  await AsyncStorage.multiRemove([
+    `@autokeep/documents/${vehicleId}`,
+    `@autokeep/mileage/${vehicleId}`,
+    `@autokeep/maintenance-settings/${vehicleId}`
+  ]);
 }
