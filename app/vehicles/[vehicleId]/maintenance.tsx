@@ -3,6 +3,7 @@ import { useCallback, useState } from "react";
 import { Alert, ScrollView, Text, TextInput, View, Pressable, StyleSheet, Switch, ActivityIndicator } from "react-native";
 import { addMileageEntry, getMileageEntries, getMaintenanceSettings, saveMaintenanceSettings, defaultMaintenanceSettings, type MaintenanceSettings } from "../../../src/services/storage/maintenance";
 import type { MileageEntry } from "../../../src/types";
+import { cancelLocalNotification, scheduleMileageReminder } from "../../../src/services/notifications";
 
 export default function MaintenanceScreen() {
   const params = useLocalSearchParams<{ vehicleId: string | string[] }>();
@@ -32,9 +33,21 @@ export default function MaintenanceScreen() {
   const oilRemaining = oilDueAt === null || latest === undefined ? null : oilDueAt - latest.odometerKm;
 
   async function changeSettings(next: MaintenanceSettings) {
-    setSettings(next);
-    try { if (vehicleId) await saveMaintenanceSettings(vehicleId, next); }
-    catch { Alert.alert("Error", "No se pudo guardar la preferencia."); }
+    if (!vehicleId) return;
+    try {
+      await cancelLocalNotification(settings.mileageNotificationId);
+      const mileageNotificationId = next.mileageAlertsEnabled
+        ? await scheduleMileageReminder(next.mileageReminderHours)
+        : undefined;
+      const persisted = { ...next, mileageNotificationId };
+      await saveMaintenanceSettings(vehicleId, persisted);
+      setSettings(persisted);
+      if (next.mileageAlertsEnabled && !mileageNotificationId) {
+        Alert.alert("Recordatorio no activado", "No se concedió permiso para las notificaciones. Podés habilitarlo desde los ajustes del teléfono.");
+      }
+    } catch {
+      Alert.alert("Error", "No se pudo guardar o programar el recordatorio.");
+    }
   }
 
   async function recordMileage() {
