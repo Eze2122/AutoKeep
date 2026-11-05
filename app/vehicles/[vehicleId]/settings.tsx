@@ -7,6 +7,7 @@ import { getVehicles, updateVehicle, deleteVehicle } from "../../../src/services
 import type { MileageEntry, Vehicle, Driver } from "../../../src/types";
 
 export default function SettingsScreen() {
+  const { t } = useAppLanguage();
   const params = useLocalSearchParams<{ vehicleId: string | string[] }>();
   const vehicleId = Array.isArray(params.vehicleId) ? params.vehicleId[0] : params.vehicleId;
   const [language, setLanguage] = useState<"es" | "en">("es");
@@ -94,32 +95,32 @@ export default function SettingsScreen() {
 
   return <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
     <Text style={styles.brand}>AutoKeep</Text>
-    <Text style={styles.title}>Configuración</Text>
-    <Text style={styles.caption}>Administrá los datos y preferencias de este vehículo.</Text>
+    <Text style={styles.title}>{t("Configuración")}</Text>
+    <Text style={styles.caption}>{t("Administrá los datos y preferencias de este vehículo.")}</Text>
 
     <View style={styles.card}>
-      <Text style={styles.sectionTitle}>🚘 Datos del vehículo</Text>
+      <Text style={styles.sectionTitle}>{t("🚘 Datos del vehículo")}</Text>
       {!vehicle ? <Text style={styles.caption}>No se encontró el vehículo.</Text> : <>
-        <Text style={styles.fieldLabel}>Modelo</Text>
-        <TextInput value={model} onChangeText={setModel} placeholder="Modelo del vehículo" style={styles.input} />
-        <Text style={styles.fieldLabel}>Patente</Text>
-        <TextInput value={plate} onChangeText={setPlate} autoCapitalize="characters" placeholder="Patente" style={styles.input} />
-        <Text style={styles.sectionTitle}>👤 Choferes</Text>
+        <Text style={styles.fieldLabel}>{t("Modelo")}</Text>
+        <TextInput value={model} onChangeText={setModel} placeholder={t("Modelo del vehículo")} style={styles.input} />
+        <Text style={styles.fieldLabel}>{t("Patente")}</Text>
+        <TextInput value={plate} onChangeText={setPlate} autoCapitalize="characters" placeholder={t("Patente")} style={styles.input} />
+        <Text style={styles.sectionTitle}>{t("👤 Choferes")}</Text>
         {drivers.map((driver, index) => <View key={driver.id} style={styles.driverRow}>
           <View style={{ flex: 1 }}>
             <Text style={styles.fieldLabel}>Chofer {index + 1}</Text>
-            <TextInput value={driver.name} onChangeText={name => setDrivers(current => current.map(item => item.id === driver.id ? { ...item, name } : item))} placeholder="Nombre del chofer" style={styles.input} />
+            <TextInput value={driver.name} onChangeText={name => setDrivers(current => current.map(item => item.id === driver.id ? { ...item, name } : item))} placeholder={t("Nombre del chofer")} style={styles.input} />
           </View>
-          <Pressable style={styles.removeDriver} onPress={() => removeDriver(driver.id)}><Text style={styles.removeText}>Quitar</Text></Pressable>
+          <Pressable style={styles.removeDriver} onPress={() => removeDriver(driver.id)}><Text style={styles.removeText}>{t("Quitar")}</Text></Pressable>
         </View>)}
-        <Pressable style={styles.addDriver} onPress={addDriver}><Text style={styles.addDriverText}>＋ Agregar chofer</Text></Pressable>
+        <Pressable style={styles.addDriver} onPress={addDriver}><Text style={styles.addDriverText}>{t("＋ Agregar chofer")}</Text></Pressable>
         <Pressable disabled={savingVehicle} style={[styles.saveButton, savingVehicle && { opacity: 0.6 }]} onPress={handleSaveVehicle}><Text style={styles.saveButtonText}>{savingVehicle ? "Guardando…" : "Guardar cambios"}</Text></Pressable>
-        <Pressable style={styles.deleteVehicle} onPress={confirmDeleteVehicle}><Text style={styles.deleteText}>Eliminar vehículo de la flota</Text></Pressable>
+        <Pressable style={styles.deleteVehicle} onPress={confirmDeleteVehicle}><Text style={styles.deleteText}>{t("Eliminar vehículo de la flota")}</Text></Pressable>
       </>}
     </View>
 
     <View style={styles.card}>
-      <Text style={styles.sectionTitle}>🌐 Idioma</Text>
+      <Text style={styles.sectionTitle}>{t("🌐 Idioma")}</Text>
       <View style={styles.row}>
         <Pressable style={[styles.choice, language === "es" && styles.selected]} onPress={() => changeLanguage("es")}><Text style={[styles.choiceText, language === "es" && styles.selectedText]}>Español</Text></Pressable>
         <Pressable style={[styles.choice, language === "en" && styles.selected]} onPress={() => changeLanguage("en")}><Text style={[styles.choiceText, language === "en" && styles.selected && styles.selectedText]}>English</Text></Pressable>
@@ -127,17 +128,17 @@ export default function SettingsScreen() {
       <Text style={styles.caption}>La preferencia se guarda en el dispositivo. La traducción completa se implementará en una etapa posterior.</Text>
     </View>
     <View style={styles.card}>
-      <Text style={styles.sectionTitle}>📚 Historial de kilometraje</Text>
-      {history.length === 0 ? <Text style={styles.caption}>Todavía no hay registros de odómetro.</Text> : history.map((entry) => <View key={entry.id} style={styles.historyItem}>
+      <Text style={styles.sectionTitle}>{t("📚 Historial de kilometraje")}</Text>
+      {history.length === 0 ? <Text style={styles.caption}>{t("Todavía no hay registros de odómetro.")}</Text> : history.map((entry) => <View key={entry.id} style={styles.historyItem}>
         <Text style={styles.historyKm}>{entry.odometerKm.toLocaleString("es-AR")} km</Text>
         <Text style={styles.caption}>{new Date(entry.recordedAt).toLocaleString("es-AR")}</Text>
       </View>)}
     </View>
     <View style={styles.card}>
-      <Text style={styles.sectionTitle}>🔒 Privacidad</Text>
-      <Text style={styles.caption}>Los datos se almacenan localmente en tu dispositivo. La política de privacidad oficial se agregará antes de la publicación.</Text>
+      <Text style={styles.sectionTitle}>{t("🔒 Privacidad")}</Text>
+      <Text style={styles.caption}>{t("Los datos se almacenan localmente en tu dispositivo. La política de privacidad oficial se agregará antes de la publicación.")}</Text>
     </View>
-    <Pressable style={styles.back} onPress={() => router.back()}><Text style={styles.backText}>Volver al vehículo</Text></Pressable>
+    <Pressable style={styles.back} onPress={() => router.back()}><Text style={styles.backText}>{t("Volver al vehículo")}</Text></Pressable>
   </ScrollView>;
 }
 const styles = StyleSheet.create({
