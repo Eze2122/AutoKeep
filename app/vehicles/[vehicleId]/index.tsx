@@ -3,16 +3,18 @@ import { Text, View, Pressable, StyleSheet } from "react-native";
 
 const sections = [
   { title: "Mantenimiento", route: "maintenance", icon: "🛠️", subtitle: "Kilometraje y cambio de aceite" },
+  { title: "Historial de servicios", route: "service-history", icon: "📚", subtitle: "Aceite, filtros, frenos, neumáticos y costos" },
   { title: "Documentación", route: "documents", icon: "📄", subtitle: "Vencimientos y archivos" },
-  { title: "Configuración", route: "settings", icon: "⚙️", subtitle: "Preferencias del vehículo" }
+  { title: "Configuración", route: "settings", icon: "⚙️", subtitle: "Vehículo, choferes y preferencias" }
 ];
 export default function VehicleDashboard() {
-  const { vehicleId } = useLocalSearchParams<{ vehicleId: string }>();
+  const params = useLocalSearchParams<{ vehicleId: string | string[] }>();
+  const vehicleId = Array.isArray(params.vehicleId) ? params.vehicleId[0] : params.vehicleId;
   return <View style={styles.container}>
     <Text style={styles.brand}>AutoKeep</Text><Text style={styles.title}>Panel del vehículo</Text>
     <Text style={styles.caption}>Vehículo: {vehicleId}</Text>
     {sections.map((item) => <Link key={item.route} href={`/vehicles/${vehicleId}/${item.route}`} asChild>
-      <Pressable style={styles.card}><Text style={styles.icon}>{item.icon}</Text><View><Text style={styles.cardTitle}>{item.title}</Text><Text style={styles.caption}>{item.subtitle}</Text></View></Pressable>
+      <Pressable style={styles.card}><Text style={styles.icon}>{item.icon}</Text><View style={{ flex: 1 }}><Text style={styles.cardTitle}>{item.title}</Text><Text style={styles.caption}>{item.subtitle}</Text></View></Pressable>
     </Link>)}
   </View>;
 }
