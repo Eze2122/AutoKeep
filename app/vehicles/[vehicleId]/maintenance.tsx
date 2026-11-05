@@ -5,13 +5,15 @@ import { addMileageEntry, updateMileageEntry, deleteMileageEntry, getMileageEntr
 import type { MileageEntry } from "../../../src/types";
 import { cancelLocalNotification, scheduleMileageReminder } from "../../../src/services/notifications";
 
+import { useAppLanguage } from "../../../src/services/i18n";
 export default function MaintenanceScreen() {
   const { t } = useAppLanguage();
   const params = useLocalSearchParams<{ vehicleId: string | string[] }>();
   const vehicleId = Array.isArray(params.vehicleId) ? params.vehicleId[0] : params.vehicleId;
   const [entries, setEntries] = useState<MileageEntry[]>([]);
   const [settings, setSettings] = useState<MaintenanceSettings>(defaultMaintenanceSettings);
-  const [reading, setReading] = useState("");\n  const [editingEntry, setEditingEntry] = useState<MileageEntry | null>(null);
+  const [reading, setReading] = useState("");
+  const [editingEntry, setEditingEntry] = useState<MileageEntry | null>(null);
   const [oilReading, setOilReading] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -99,7 +101,8 @@ export default function MaintenanceScreen() {
         <View style={styles.switchRow}><Text style={styles.label}>{t("Alertas de kilometraje")}</Text><Switch value={settings.mileageAlertsEnabled} onValueChange={(value) => changeSettings({ ...settings, mileageAlertsEnabled: value })} trackColor={{ true: "#137C70" }} /></View>
         <Text style={styles.label}>{t("Odómetro actual (km)")}</Text>
         <TextInput value={reading} onChangeText={setReading} keyboardType="decimal-pad" placeholder="Ej. 253931" style={styles.input}/>
-        <Pressable style={styles.button} onPress={recordMileage}><Text style={styles.buttonText}>{editingEntry ? "Actualizar lectura" : "Guardar kilometraje"}</Text></Pressable>\n        {editingEntry && <Pressable style={styles.back} onPress={() => { setEditingEntry(null); setReading(""); }}><Text style={styles.backText}>{t("Cancelar edición")}</Text></Pressable>}
+        <Pressable style={styles.button} onPress={recordMileage}><Text style={styles.buttonText}>{editingEntry ? "Actualizar lectura" : "Guardar kilometraje"}</Text></Pressable>
+        {editingEntry && <Pressable style={styles.back} onPress={() => { setEditingEntry(null); setReading(""); }}><Text style={styles.backText}>{t("Cancelar edición")}</Text></Pressable>}
         <View style={styles.metric}><Text style={styles.metricLabel}>{t("Última lectura")}</Text><Text style={styles.metricValue}>{latest ? `${latest.odometerKm.toLocaleString("es-AR")} km` : "Sin registros"}</Text></View>
         <View style={styles.metric}><Text style={styles.metricLabel}>Km recorridos desde registro anterior</Text><Text style={styles.metricValue}>{driven === null ? "Necesitás 2 registros" : `${driven.toLocaleString("es-AR")} km`}</Text></View>
         {latest && <Text style={styles.caption}>Último registro: {new Date(latest.recordedAt).toLocaleString("es-AR")}</Text>}
