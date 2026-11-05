@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { Vehicle } from "../../types";
+import { cancelLocalNotification } from "../notifications";
 
 const VEHICLES_KEY = "@autokeep/vehicles";
 
@@ -33,6 +34,13 @@ export async function updateVehicle(vehicle: Vehicle): Promise<void> {
 
 export async function deleteVehicle(vehicleId: string): Promise<void> {
   const vehicles = await getVehicles();
+  const rawSettings = await AsyncStorage.getItem(`@autokeep/maintenance-settings/${vehicleId}`);
+  if (rawSettings) {
+    try {
+      const settings = JSON.parse(rawSettings) as { mileageNotificationId?: string };
+      await cancelLocalNotification(settings.mileageNotificationId);
+    } catch { /* Continue cleaning the vehicle local data. */ }
+  }
   await AsyncStorage.setItem(VEHICLES_KEY, JSON.stringify(vehicles.filter((item) => item.id !== vehicleId)));
   await AsyncStorage.multiRemove([
     `@autokeep/documents/${vehicleId}`,
