@@ -4,6 +4,7 @@ import { Alert, Image, ScrollView, Text, TextInput, View, Pressable, StyleSheet,
 import * as ImagePicker from "expo-image-picker";
 import type { DocumentKind, VehicleDocument } from "../../../src/types";
 import { addVehicleDocument, deleteVehicleDocument, getVehicleDocuments } from "../../../src/services/storage/documents";
+import { cancelLocalNotification, scheduleDocumentExpiryAlert } from "../../../src/services/notifications";
 
 const kinds: DocumentKind[] = ["Permiso de transporte (aplicación)", "Permiso de transporte (turismo)", "RTO", "Seguro", "Pago de patente", "Cédula de GNC", "Cédula verde o azul", "Otro documento"];
 const alertOptions = [1, 3, 7, 15, 30];
@@ -40,7 +41,9 @@ export default function DocumentsScreen() {
       Alert.alert("Fecha inválida", "Ingresá la fecha con formato AAAA-MM-DD. Ejemplo: 2027-04-22."); return;
     }
     try {
-      const doc: VehicleDocument = { id: `doc-${Date.now()}`, vehicleId, kind, customName: customName.trim() || undefined, expiresAt: expiry, alertDays, photoUri };
+      const displayName = customName.trim() || kind;
+      const notificationId = await scheduleDocumentExpiryAlert(displayName, expiry, alertDays);
+      const doc: VehicleDocument = { id: `doc-${Date.now()}`, vehicleId, kind, customName: customName.trim() || undefined, expiresAt: expiry, alertDays, photoUri, notificationId };
       await addVehicleDocument(doc);
       setCustomName(""); setExpiry(""); setPhotoUri(undefined); setAlertDays(7); await refresh();
       Alert.alert("Documento guardado", "Se guardó en la documentación de este vehículo.");
@@ -50,7 +53,7 @@ export default function DocumentsScreen() {
   function removeDocument(doc: VehicleDocument) {
     Alert.alert("Eliminar documento", `¿Querés eliminar “${doc.customName || doc.kind}”?`, [
       { text: "Cancelar", style: "cancel" },
-      { text: "Eliminar", style: "destructive", onPress: async () => { if (vehicleId) { await deleteVehicleDocument(vehicleId, doc.id); await refresh(); } } }
+      { text: "Eliminar", style: "destructive", onPress: async () => { if (vehicleId) { await cancelLocalNotification(doc.notificationId); await deleteVehicleDocument(vehicleId, doc.id); await refresh(); } } }
     ]);
   }
 
