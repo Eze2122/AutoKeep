@@ -1,28 +1,39 @@
 import { useLocalSearchParams, router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
-import { Alert, ScrollView, Text, View, Pressable, StyleSheet } from "react-native";
+import { Alert, ScrollView, Text, View, Pressable, StyleSheet, TextInput } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getMileageEntries } from "../../../src/services/storage/maintenance";
-import type { MileageEntry } from "../../../src/types";
-
+import { getVehicles, updateVehicle, deleteVehicle } from "../../../src/services/storage/vehicles";
+import type { MileageEntry, Vehicle, Driver } from "../../../src/types";
 
 export default function SettingsScreen() {
   const params = useLocalSearchParams<{ vehicleId: string | string[] }>();
   const vehicleId = Array.isArray(params.vehicleId) ? params.vehicleId[0] : params.vehicleId;
   const [language, setLanguage] = useState<"es" | "en">("es");
   const [history, setHistory] = useState<MileageEntry[]>([]);
+  const [vehicle, setVehicle] = useState<Vehicle | null>(null);
+  const [model, setModel] = useState("");
+  const [plate, setPlate] = useState("");
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [savingVehicle, setSavingVehicle] = useState(false);
 
   useFocusEffect(useCallback(() => {
     let active = true;
     async function load() {
       if (!vehicleId) return;
-      const [storedLanguage, records] = await Promise.all([
+      const [storedLanguage, records, allVehicles] = await Promise.all([
         AsyncStorage.getItem("@autokeep/language"),
-        getMileageEntries(vehicleId)
+        getMileageEntries(vehicleId),
+        getVehicles()
       ]);
+      const current = allVehicles.find(item => item.id === vehicleId) ?? null;
       if (active) {
         setLanguage(storedLanguage === "en" ? "en" : "es");
         setHistory(records.slice().reverse());
+        setVehicle(current);
+        setModel(current?.model ?? "");
+        setPlate(current?.plate ?? "");
+        setDrivers(current?.drivers ?? []);
       }
     }
     load().catch(() => Alert.alert("Error", "No se pudo cargar la configuración."));
@@ -32,21 +43,88 @@ export default function SettingsScreen() {
   async function changeLanguage(next: "es" | "en") {
     setLanguage(next);
     try { await AsyncStorage.setItem("@autokeep/language", next); }
-    catch { Alert.alert("Error", "No se pudo guardar el idioma."); }
+    catch { Alert.alert("Error", "No se pudo guardar el idioma."); return; }
     Alert.alert("Idioma guardado", next === "es" ? "Preferencia: Español." : "Preference: English. Note: translations will be applied progressively.");
   }
 
-  return <ScrollView contentContainerStyle={styles.container}>
+  async function handleSaveVehicle() {
+    if (!vehicle) return;
+    const cleanModel = model.trim();
+    const cleanPlate = plate.trim().toUpperCase();
+    const cleanDrivers = drivers.map(d => ({ ...d, name: d.name.trim() })).filter(d => d.name.length > 0);
+    if (!cleanModel || !cleanPlate) {
+      Alert.alert("Datos incompletos", "Ingresá modelo y patente.");
+      return;
+    }
+    setSavingVehicle(true);
+    try {
+      const updated = { ...vehicle, model: cleanModel, plate: cleanPlate, drivers: cleanDrivers };
+      await updateVehicle(updated);
+      setVehicle(updated);
+      setDrivers(cleanDrivers);
+      Alert.alert("Guardado", "Los datos del vehículo y sus choferes se actualizaron.");
+    } catch (error) {
+      Alert.alert("No se pudo guardar", error instanceof Error && error.message === "DUPLICATE_PLATE" ? "Ya existe otro vehículo con esa patente." : "Intentá nuevamente.");
+    } finally { setSavingVehicle(false); }
+  }
+
+  function addDriver() {
+    setDrivers(current => [...current, { id: `driver-${Date.now()}`, name: "" }]);
+  }
+
+  function removeDriver(driverId: string) {
+    Alert.alert("Eliminar chofer", "¿Querés quitar este chofer del vehículo?", [
+      { text: "Cancelar", style: "cancel" },
+      { text: "Eliminar", style: "destructive", onPress: () => setDrivers(current => current.filter(driver => driver.id !== driverId)) }
+    ]);
+  }
+
+  function confirmDeleteVehicle() {
+    if (!vehicleId) return;
+    Alert.alert("Eliminar vehículo", "Se quitará este vehículo de tu flota. Esta acción no se puede deshacer.", [
+      { text: "Cancelar", style: "cancel" },
+      { text: "Eliminar", style: "destructive", onPress: async () => {
+        try {
+          await deleteVehicle(vehicleId);
+          router.replace("/");
+        } catch { Alert.alert("Error", "No se pudo eliminar el vehículo."); }
+      }}
+    ]);
+  }
+
+  return <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
     <Text style={styles.brand}>AutoKeep</Text>
     <Text style={styles.title}>Configuración</Text>
-    <Text style={styles.caption}>Preferencias e historial de este vehículo.</Text>
+    <Text style={styles.caption}>Administrá los datos y preferencias de este vehículo.</Text>
+
+    <View style={styles.card}>
+      <Text style={styles.sectionTitle}>🚘 Datos del vehículo</Text>
+      {!vehicle ? <Text style={styles.caption}>No se encontró el vehículo.</Text> : <>
+        <Text style={styles.fieldLabel}>Modelo</Text>
+        <TextInput value={model} onChangeText={setModel} placeholder="Modelo del vehículo" style={styles.input} />
+        <Text style={styles.fieldLabel}>Patente</Text>
+        <TextInput value={plate} onChangeText={setPlate} autoCapitalize="characters" placeholder="Patente" style={styles.input} />
+        <Text style={styles.sectionTitle}>👤 Choferes</Text>
+        {drivers.map((driver, index) => <View key={driver.id} style={styles.driverRow}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.fieldLabel}>Chofer {index + 1}</Text>
+            <TextInput value={driver.name} onChangeText={name => setDrivers(current => current.map(item => item.id === driver.id ? { ...item, name } : item))} placeholder="Nombre del chofer" style={styles.input} />
+          </View>
+          <Pressable style={styles.removeDriver} onPress={() => removeDriver(driver.id)}><Text style={styles.removeText}>Quitar</Text></Pressable>
+        </View>)}
+        <Pressable style={styles.addDriver} onPress={addDriver}><Text style={styles.addDriverText}>＋ Agregar chofer</Text></Pressable>
+        <Pressable disabled={savingVehicle} style={[styles.saveButton, savingVehicle && { opacity: 0.6 }]} onPress={handleSaveVehicle}><Text style={styles.saveButtonText}>{savingVehicle ? "Guardando…" : "Guardar cambios"}</Text></Pressable>
+        <Pressable style={styles.deleteVehicle} onPress={confirmDeleteVehicle}><Text style={styles.deleteText}>Eliminar vehículo de la flota</Text></Pressable>
+      </>}
+    </View>
+
     <View style={styles.card}>
       <Text style={styles.sectionTitle}>🌐 Idioma</Text>
       <View style={styles.row}>
         <Pressable style={[styles.choice, language === "es" && styles.selected]} onPress={() => changeLanguage("es")}><Text style={[styles.choiceText, language === "es" && styles.selectedText]}>Español</Text></Pressable>
-        <Pressable style={[styles.choice, language === "en" && styles.selected]} onPress={() => changeLanguage("en")}><Text style={[styles.choiceText, language === "en" && styles.selectedText]}>English</Text></Pressable>
+        <Pressable style={[styles.choice, language === "en" && styles.selected]} onPress={() => changeLanguage("en")}><Text style={[styles.choiceText, language === "en" && styles.selected && styles.selectedText]}>English</Text></Pressable>
       </View>
-      <Text style={styles.caption}>La preferencia se guarda en el dispositivo. La traducción completa de pantallas se añadirá en una etapa posterior.</Text>
+      <Text style={styles.caption}>La preferencia se guarda en el dispositivo. La traducción completa se implementará en una etapa posterior.</Text>
     </View>
     <View style={styles.card}>
       <Text style={styles.sectionTitle}>📚 Historial de kilometraje</Text>
@@ -68,7 +146,18 @@ const styles = StyleSheet.create({
   title: { fontSize: 28, fontWeight: "800", color: "#20312F", marginTop: 18 },
   caption: { color: "#71817D", lineHeight: 20, marginTop: 7, fontSize: 13 },
   card: { backgroundColor: "#FFFFFF", borderRadius: 18, padding: 18, marginTop: 18 },
-  sectionTitle: { fontSize: 17, fontWeight: "800", color: "#20312F", marginBottom: 10 },
+  sectionTitle: { fontSize: 17, fontWeight: "800", color: "#20312F", marginBottom: 10, marginTop: 8 },
+  fieldLabel: { color: "#20312F", fontWeight: "700", marginTop: 10, marginBottom: 6 },
+  input: { backgroundColor: "#FFFFFF", borderColor: "#DDE8E5", borderWidth: 1, borderRadius: 12, padding: 13, color: "#20312F" },
+  driverRow: { flexDirection: "row", alignItems: "flex-end", gap: 9, marginTop: 5 },
+  removeDriver: { padding: 12, marginBottom: 1 },
+  removeText: { color: "#B42318", fontWeight: "700" },
+  addDriver: { padding: 13, alignItems: "center", marginTop: 8 },
+  addDriverText: { color: "#137C70", fontWeight: "800" },
+  saveButton: { backgroundColor: "#137C70", padding: 15, borderRadius: 13, alignItems: "center", marginTop: 12 },
+  saveButtonText: { color: "#FFFFFF", fontWeight: "800" },
+  deleteVehicle: { padding: 14, alignItems: "center", marginTop: 8 },
+  deleteText: { color: "#B42318", fontWeight: "700" },
   row: { flexDirection: "row", gap: 10 },
   choice: { flex: 1, borderWidth: 1, borderColor: "#DDE8E5", borderRadius: 12, padding: 13, alignItems: "center" },
   selected: { borderColor: "#137C70", backgroundColor: "#E5F4F1" },
