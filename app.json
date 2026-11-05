@@ -18,7 +18,8 @@
           "resizeMode": "contain",
           "backgroundColor": "#F5F7FA"
         }
-      ]
+      ],
+      "expo-notifications"
     ],
     "android": {
       "package": "com.eze2122.autokeep",
