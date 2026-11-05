@@ -6,6 +6,7 @@ import type { DocumentKind, VehicleDocument } from "../../../src/types";
 import { addVehicleDocument, updateVehicleDocument, deleteVehicleDocument, getVehicleDocuments } from "../../../src/services/storage/documents";
 import { cancelLocalNotification, scheduleDocumentExpiryAlert } from "../../../src/services/notifications";
 
+import { useAppLanguage } from "../../../src/services/i18n";
 const kinds: DocumentKind[] = ["Permiso de transporte (aplicación)", "Permiso de transporte (turismo)", "RTO", "Seguro", "Pago de patente", "Cédula de GNC", "Cédula verde o azul", "Otro documento"];
 const alertOptions = [1, 3, 7, 15, 30];
 
@@ -18,7 +19,8 @@ export default function DocumentsScreen() {
   const [customName, setCustomName] = useState("");
   const [expiry, setExpiry] = useState("");
   const [alertDays, setAlertDays] = useState(7);
-  const [photoUri, setPhotoUri] = useState<string | undefined>();\n  const [editingDoc, setEditingDoc] = useState<VehicleDocument | null>(null);
+  const [photoUri, setPhotoUri] = useState<string | undefined>();
+  const [editingDoc, setEditingDoc] = useState<VehicleDocument | null>(null);
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
@@ -81,7 +83,8 @@ export default function DocumentsScreen() {
       <View style={styles.row}>{alertOptions.map((days) => <Pressable key={days} onPress={() => setAlertDays(days)} style={[styles.alertChoice, alertDays === days && styles.selected]}><Text style={[styles.kindText, alertDays === days && styles.selectedText]}>{days} d</Text></Pressable>)}</View>
       <Pressable style={styles.photoButton} onPress={pickPhoto}><Text style={styles.photoText}>{photoUri ? "Cambiar foto adjunta" : "📷 Adjuntar foto del documento"}</Text></Pressable>
       {photoUri && <Image source={{ uri: photoUri }} style={styles.preview} resizeMode="contain" />}
-      <Pressable style={styles.button} onPress={saveDocument}><Text style={styles.buttonText}>{editingDoc ? "Actualizar documento" : "Guardar documento"}</Text></Pressable>\n      {editingDoc && <Pressable style={styles.deleteButton} onPress={() => { setEditingDoc(null); setKind(kinds[0]); setCustomName(""); setExpiry(""); setAlertDays(7); setPhotoUri(undefined); }}><Text style={styles.deleteText}>{t("Cancelar edición")}</Text></Pressable>}
+      <Pressable style={styles.button} onPress={saveDocument}><Text style={styles.buttonText}>{editingDoc ? "Actualizar documento" : "Guardar documento"}</Text></Pressable>
+      {editingDoc && <Pressable style={styles.deleteButton} onPress={() => { setEditingDoc(null); setKind(kinds[0]); setCustomName(""); setExpiry(""); setAlertDays(7); setPhotoUri(undefined); }}><Text style={styles.deleteText}>{t("Cancelar edición")}</Text></Pressable>}
     </View>
     <Text style={styles.listTitle}>{t("Documentos guardados")}</Text>
     {loading ? <ActivityIndicator color="#137C70" style={{ marginTop: 18 }} /> : documents.length === 0 ? <Text style={styles.caption}>Todavía no hay documentos registrados.</Text> : documents.map((doc) => <View key={doc.id} style={styles.savedCard}>
