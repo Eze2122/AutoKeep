@@ -1,0 +1,19 @@
+{
+  "expo": {
+    "name": "AutoKeep",
+    "slug": "autokeep",
+    "scheme": "autokeep",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "plugins": ["expo-router"],
+    "android": {
+      "package": "com.eze2122.autokeep",
+      "versionCode": 1
+    },
+    "ios": {
+      "bundleIdentifier": "com.eze2122.autokeep"
+    }
+  }
+}
