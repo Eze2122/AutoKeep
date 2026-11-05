@@ -32,11 +32,11 @@ export default function ServiceHistoryScreen() {
     const odometer = Number(km.replace(",", "."));
     const amount = cost.trim() ? Number(cost.replace(",", ".")) : undefined;
     if (!vehicleId || !cleanTitle || !Number.isFinite(odometer) || odometer <= 0) {
-      Alert.alert("Datos incompletos", "Ingresá descripción y kilometraje válido.");
+      Alert.alert(t("Datos incompletos"), t("Ingresá descripción y kilometraje válido."));
       return;
     }
     if (amount !== undefined && (!Number.isFinite(amount) || amount < 0)) {
-      Alert.alert("Costo inválido", "El costo debe ser un número positivo.");
+      Alert.alert(t("Costo inválido"), t("El costo debe ser un número positivo."));
       return;
     }
     const record: ServiceRecord = { id: `service-${Date.now()}`, vehicleId, title: cleanTitle, category, odometerKm: odometer, performedAt: new Date().toISOString(), cost: amount, notes: notes.trim() || undefined };
@@ -44,42 +44,42 @@ export default function ServiceHistoryScreen() {
       await addServiceRecord(record);
       setTitle(""); setKm(""); setCost(""); setNotes("");
       await refresh();
-      Alert.alert("Servicio registrado", "Se agregó al historial de este vehículo.");
-    } catch { Alert.alert("Error", "No se pudo guardar el servicio."); }
+      Alert.alert(t("Servicio registrado"), t("Se agregó al historial de este vehículo."));
+    } catch { Alert.alert(t("Error"), t("No se pudo guardar el servicio.")); }
   }
 
   function confirmDelete(record: ServiceRecord) {
-    Alert.alert("Eliminar registro", `¿Eliminar “${record.title}” del historial?`, [
+    Alert.alert(t("Eliminar registro"), `${t("¿Eliminar “")}${record.title}” ${t("del historial?")}`, [
       { text: "Cancelar", style: "cancel" },
       { text: "Eliminar", style: "destructive", onPress: async () => {
         try { if (vehicleId) await deleteServiceRecord(vehicleId, record.id); await refresh(); }
-        catch { Alert.alert("Error", "No se pudo eliminar el registro."); }
+        catch { Alert.alert(t("Error"), t("No se pudo eliminar el registro.")); }
       }}
     ]);
   }
 
   return <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
     <Text style={styles.brand}>AutoKeep</Text>
-    <Text style={styles.title}>Historial de mantenimiento</Text>
-    <Text style={styles.caption}>Cada servicio queda asociado al vehículo, no al conductor.</Text>
+    <Text style={styles.title}>{t("Historial de mantenimiento")}</Text>
+    <Text style={styles.caption}>{t("Cada servicio queda asociado al vehículo, no al conductor.")}</Text>
     <View style={styles.card}>
       <Text style={styles.sectionTitle}>{t("＋ Registrar servicio")}</Text>
       <Text style={styles.label}>{t("Tipo")}</Text>
       <View style={styles.categories}>{categories.map(item => <Pressable key={item.value} onPress={() => setCategory(item.value)} style={[styles.category, category === item.value && styles.activeCategory]}><Text style={[styles.categoryText, category === item.value && styles.activeCategoryText]}>{item.label}</Text></Pressable>)}</View>
       <Text style={styles.label}>{t("Descripción del trabajo")}</Text>
-      <TextInput value={title} onChangeText={setTitle} placeholder="Ej. Cambio de aceite y filtro" style={styles.input}/>
+      <TextInput value={title} onChangeText={setTitle} placeholder={t("Ej. Cambio de aceite y filtro")} style={styles.input}/>
       <Text style={styles.label}>{t("Kilometraje del servicio")}</Text>
-      <TextInput value={km} onChangeText={setKm} keyboardType="decimal-pad" placeholder="Ej. 253000" style={styles.input}/>
+      <TextInput value={km} onChangeText={setKm} keyboardType="decimal-pad" placeholder={t("Ej. 253000")} style={styles.input}/>
       <Text style={styles.label}>{t("Costo (opcional)")}</Text>
       <TextInput value={cost} onChangeText={setCost} keyboardType="decimal-pad" placeholder="ARS" style={styles.input}/>
       <Text style={styles.label}>{t("Notas (opcional)")}</Text>
-      <TextInput value={notes} onChangeText={setNotes} multiline placeholder="Repuestos, taller, observaciones…" style={[styles.input, { minHeight: 75 }]}/>
-      <Pressable style={styles.button} onPress={save}><Text style={styles.buttonText}>{editingRecord ? "Actualizar servicio" : "Guardar servicio"}</Text></Pressable>
+      <TextInput value={notes} onChangeText={setNotes} multiline placeholder={t("Repuestos, taller, observaciones…")} style={[styles.input, { minHeight: 75 }]}/>
+      <Pressable style={styles.button} onPress={save}><Text style={styles.buttonText}>{editingRecord ? t("Actualizar servicio") : t("Guardar servicio")}</Text></Pressable>
       {editingRecord && <Pressable style={styles.back} onPress={() => { setEditingRecord(null); setTitle(""); setKm(""); setCost(""); setNotes(""); setCategory("oil"); }}><Text style={styles.backText}>{t("Cancelar edición")}</Text></Pressable>}
     </View>
     <View style={styles.card}>
-      <Text style={styles.sectionTitle}>📚 Servicios anteriores ({records.length})</Text>
-      {!records.length ? <Text style={styles.caption}>Todavía no hay servicios registrados.</Text> : records.map(record => <View key={record.id} style={styles.record}>
+      <Text style={styles.sectionTitle}>{t("📚 Servicios anteriores")} ({records.length})</Text>
+      {!records.length ? <Text style={styles.caption}>{t("Todavía no hay servicios registrados.")}</Text> : records.map(record => <View key={record.id} style={styles.record}>
         <View style={{ flex: 1 }}>
           <Text style={styles.recordTitle}>{record.title}</Text>
           <Text style={styles.caption}>{categories.find(item => item.value === record.category)?.label} · {record.odometerKm.toLocaleString("es-AR")} km</Text>
