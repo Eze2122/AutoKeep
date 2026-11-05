@@ -22,11 +22,7 @@
     ],
     "android": {
       "package": "com.eze2122.autokeep",
-      "versionCode": 1,
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#F5F7FA"
-      }
+      "versionCode": 1
     },
     "ios": {
       "bundleIdentifier": "com.eze2122.autokeep"
