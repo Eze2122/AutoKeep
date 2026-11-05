@@ -10,6 +10,7 @@ type TimelineItem =
   | { id: string; type: "service"; date: string; record: ServiceRecord };
 
 export default function VehicleTimelineScreen() {
+  const { t } = useAppLanguage();
   const params = useLocalSearchParams<{ vehicleId: string | string[] }>();
   const vehicleId = Array.isArray(params.vehicleId) ? params.vehicleId[0] : params.vehicleId;
   const [items, setItems] = useState<TimelineItem[]>([]);
@@ -30,7 +31,7 @@ export default function VehicleTimelineScreen() {
 
   return <ScrollView contentContainerStyle={styles.container}>
     <Text style={styles.brand}>AutoKeep</Text>
-    <Text style={styles.title}>Historial unificado</Text>
+    <Text style={styles.title}>{t("Historial unificado")}</Text>
     <Text style={styles.caption}>Kilometraje y servicios, ordenados del más reciente al más antiguo. Todo está asociado al vehículo.</Text>
     <View style={styles.card}>
       <Text style={styles.sectionTitle}>Actividad ({items.length})</Text>
@@ -44,7 +45,7 @@ export default function VehicleTimelineScreen() {
         </View>
       </View>)}
     </View>
-    <Pressable style={styles.back} onPress={() => router.back()}><Text style={styles.backText}>Volver al vehículo</Text></Pressable>
+    <Pressable style={styles.back} onPress={() => router.back()}><Text style={styles.backText}>{t("Volver al vehículo")}</Text></Pressable>
   </ScrollView>;
 }
 
