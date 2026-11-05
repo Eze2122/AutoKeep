@@ -1,7 +1,7 @@
 import { useLocalSearchParams, router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { Alert, ScrollView, Text, TextInput, View, Pressable, StyleSheet, Switch, ActivityIndicator } from "react-native";
-import { addMileageEntry, getMileageEntries, getMaintenanceSettings, saveMaintenanceSettings, defaultMaintenanceSettings, type MaintenanceSettings } from "../../../src/services/storage/maintenance";
+import { addMileageEntry, deleteMileageEntry, getMileageEntries, getMaintenanceSettings, saveMaintenanceSettings, defaultMaintenanceSettings, type MaintenanceSettings } from "../../../src/services/storage/maintenance";
 import type { MileageEntry } from "../../../src/types";
 import { cancelLocalNotification, scheduleMileageReminder } from "../../../src/services/notifications";
 
@@ -65,6 +65,16 @@ export default function MaintenanceScreen() {
     catch { Alert.alert("Error", "No se pudo guardar el registro."); }
   }
 
+  function confirmDeleteMileage(entry: MileageEntry) {
+    Alert.alert("Eliminar lectura", `¿Eliminar el registro de ${entry.odometerKm.toLocaleString("es-AR")} km?`, [
+      { text: "Cancelar", style: "cancel" },
+      { text: "Eliminar", style: "destructive", onPress: async () => {
+        try { if (vehicleId) await deleteMileageEntry(vehicleId, entry.id); await refresh(); }
+        catch { Alert.alert("Error", "No se pudo eliminar la lectura."); }
+      }}
+    ]);
+  }
+
   async function saveOilChange() {
     const value = Number(oilReading.replace(",", "."));
     if (!Number.isFinite(value) || value <= 0) { Alert.alert("Kilometraje inválido", "Ingresá los km en los que se hizo el cambio de aceite."); return; }
@@ -92,6 +102,14 @@ export default function MaintenanceScreen() {
         <View style={styles.metric}><Text style={styles.metricLabel}>Última lectura</Text><Text style={styles.metricValue}>{latest ? `${latest.odometerKm.toLocaleString("es-AR")} km` : "Sin registros"}</Text></View>
         <View style={styles.metric}><Text style={styles.metricLabel}>Km recorridos desde registro anterior</Text><Text style={styles.metricValue}>{driven === null ? "Necesitás 2 registros" : `${driven.toLocaleString("es-AR")} km`}</Text></View>
         {latest && <Text style={styles.caption}>Último registro: {new Date(latest.recordedAt).toLocaleString("es-AR")}</Text>}
+        <Text style={styles.label}>Lecturas anteriores</Text>
+        {!entries.length ? <Text style={styles.caption}>Sin historial todavía.</Text> : [...entries].reverse().map((entry) => <View key={entry.id} style={styles.mileageRecord}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.metricValue}>{entry.odometerKm.toLocaleString("es-AR")} km</Text>
+            <Text style={styles.caption}>{new Date(entry.recordedAt).toLocaleString("es-AR")}</Text>
+          </View>
+          <Pressable onPress={() => confirmDeleteMileage(entry)} style={styles.deleteButton}><Text style={styles.deleteText}>Eliminar</Text></Pressable>
+        </View>)}
       </View>
 
       <View style={styles.card}>
@@ -131,6 +149,9 @@ const styles = StyleSheet.create({
   secondaryButton: { borderColor: "#137C70", borderWidth: 1, padding: 14, borderRadius: 13, marginTop: 12, alignItems: "center" },
   secondaryText: { color: "#137C70", fontWeight: "700" },
   metric: { backgroundColor: "#F4F8F7", borderRadius: 12, padding: 13, marginTop: 10 },
+  mileageRecord: { flexDirection: "row", alignItems: "center", borderTopWidth: 1, borderTopColor: "#EEF2F1", paddingTop: 10, marginTop: 10 },
+  deleteButton: { padding: 8 },
+  deleteText: { color: "#B42318", fontWeight: "700" },
   metricLabel: { color: "#71817D", fontSize: 12, fontWeight: "600" },
   metricValue: { color: "#20312F", fontSize: 16, fontWeight: "800", marginTop: 4 },
   back: { padding: 15, alignItems: "center", marginTop: 10 },
