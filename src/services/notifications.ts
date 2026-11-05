@@ -35,3 +35,21 @@ export async function scheduleDocumentExpiryAlert(
 export async function cancelLocalNotification(notificationId?: string): Promise<void> {
   if (notificationId) await Notifications.cancelScheduledNotificationAsync(notificationId);
 }
+
+export async function scheduleMileageReminder(hours: 12 | 24): Promise<string | undefined> {
+  const permission = await Notifications.getPermissionsAsync();
+  const granted = permission.granted || (await Notifications.requestPermissionsAsync()).granted;
+  if (!granted) return undefined;
+  return Notifications.scheduleNotificationAsync({
+    content: {
+      title: "AutoKeep · Recordatorio de odómetro",
+      body: "Es momento de actualizar el kilometraje de tu vehículo.",
+      data: { type: "mileage-reminder", intervalHours: hours }
+    },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+      seconds: hours * 60 * 60,
+      repeats: true
+    }
+  });
+}
