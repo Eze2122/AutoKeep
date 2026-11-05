@@ -19,10 +19,10 @@ Este documento es el checklist de entrega. No se declara una etapa completada ha
 - [ ] Conductores: alta, edición, eliminación y asociación por vehículo.
 - [ ] Odómetro: registros por vehículo, fecha/hora, validaciones y edición/eliminación segura.
 - [x] Recordatorios de odómetro 12/24h con habilitación individual, programación recurrente y cancelación al desactivar o eliminar el vehículo (pendiente de prueba instalada).
-- [ ] Mantenimiento: historial de servicios y recordatorio de aceite configurable a 8.000/13.000 km.
+- [x] Mantenimiento: historial de servicios y recordatorio de aceite configurable a 8.000/13.000 km (implementado; falta validar en APK).
 - [ ] Documentos: categorías, documento personalizado, fecha de vencimiento, foto y eliminación.
 - [x] Notificaciones locales de vencimiento con anticipación configurable (1/3/7/15/30 días), programación al guardar y cancelación al eliminar (requiere permiso del usuario).
-- [ ] Historial unificado por vehículo.
+- [x] Historial unificado por vehículo: combina lecturas de odómetro y servicios, ordenado cronológicamente (implementado; falta validar en APK).
 - [ ] Configuración e idioma: traducción real de pantallas (español/inglés), no solo guardar preferencia.
 - [ ] Política de privacidad accesible desde la app y publicada en una URL.
 - [ ] Persistencia robusta, manejo de errores y confirmaciones; los datos se vinculan al vehículo, no al chofer.
@@ -50,4 +50,4 @@ Este documento es el checklist de entrega. No se declara una etapa completada ha
 - [ ] Publicar solo con aprobación explícita del propietario.
 
 ## Estado actual observado
-La aplicación tiene pantallas iniciales para flota, registro de vehículo, kilometraje/intervalo de aceite, documentos y ajustes. Aún hay funciones sin completar (por ejemplo, traducción integral, política de privacidad publicada y monetización). Los recordatorios locales de kilometraje (12/24 h) y vencimiento de documentos ya tienen implementación; falta validar comportamiento real mediante APK instalado. Las alertas locales de vencimiento de documentos ya se programan y se cancelan desde la pantalla de documentos, pendiente de prueba en un build instalado. Los builds de Actions previos fallaron durante la preparación del proyecto Android; no existe todavía un APK generado/verificado.
+La aplicación tiene pantallas iniciales para flota, registro de vehículo, kilometraje/intervalo de aceite, documentos y ajustes. Aún hay funciones sin completar (por ejemplo, traducción integral, política de privacidad publicada y monetización). Los recordatorios locales de kilometraje (12/24 h) y vencimiento de documentos ya tienen implementación; falta validar comportamiento real mediante APK instalado. Las alertas locales de vencimiento de documentos ya se programan y se cancelan desde la pantalla de documentos, pendiente de prueba en un build instalado. Se añadió una pantalla de historial unificado para combinar registros de odómetro y servicios, accesible desde el panel del vehículo. Los builds de Actions previos fallaron durante la preparación del proyecto Android; no existe todavía un APK generado/verificado.
