@@ -10,7 +10,7 @@ Este documento es el checklist de entrega. No se declara una etapa completada ha
 - [x] Inspeccionar estructura, rutas, tipos, almacenamiento local y configuración Expo.
 - [x] Definir perfil de build APK en GitHub Actions.
 - [ ] Asegurar que todas las dependencias de Expo estén declaradas en package.json (incluido expo-splash-screen).
-- [ ] Revisar app.json, ícono, splash, Android package, versionCode, permisos y configuración de notificaciones.
+- [ ] Revisar app.json, ícono, splash, Android package, versionCode, permisos y configuración de notificaciones. (Plugin de notificaciones agregado; revisión integral pendiente.)
 - [ ] Añadir lockfile reproducible (npm lockfile) y usar npm ci en CI.
 - [ ] Configurar TypeScript y lint/test scripts reproducibles.
 
@@ -21,7 +21,7 @@ Este documento es el checklist de entrega. No se declara una etapa completada ha
 - [ ] Recordatorios de odómetro 12/24h con habilitación individual y notificación local.
 - [ ] Mantenimiento: historial de servicios y recordatorio de aceite configurable a 8.000/13.000 km.
 - [ ] Documentos: categorías, documento personalizado, fecha de vencimiento, foto y eliminación.
-- [ ] Notificaciones de vencimiento con anticipación configurable (1/3/7/15/30 días).
+- [x] Notificaciones locales de vencimiento con anticipación configurable (1/3/7/15/30 días), programación al guardar y cancelación al eliminar (requiere permiso del usuario).
 - [ ] Historial unificado por vehículo.
 - [ ] Configuración e idioma: traducción real de pantallas (español/inglés), no solo guardar preferencia.
 - [ ] Política de privacidad accesible desde la app y publicada en una URL.
@@ -50,4 +50,4 @@ Este documento es el checklist de entrega. No se declara una etapa completada ha
 - [ ] Publicar solo con aprobación explícita del propietario.
 
 ## Estado actual observado
-La aplicación tiene pantallas iniciales para flota, registro de vehículo, kilometraje/intervalo de aceite, documentos y ajustes. Aún hay funciones sin completar (por ejemplo, edición/eliminación de vehículos, notificaciones reales, traducción integral, política de privacidad publicada y monetización). Los builds de Actions previos fallaron durante la preparación del proyecto Android; no existe todavía un APK generado/verificado.
+La aplicación tiene pantallas iniciales para flota, registro de vehículo, kilometraje/intervalo de aceite, documentos y ajustes. Aún hay funciones sin completar (por ejemplo, recordatorios de odómetro, traducción integral, política de privacidad publicada y monetización). Las alertas locales de vencimiento de documentos ya se programan y se cancelan desde la pantalla de documentos, pendiente de prueba en un build instalado. Los builds de Actions previos fallaron durante la preparación del proyecto Android; no existe todavía un APK generado/verificado.
