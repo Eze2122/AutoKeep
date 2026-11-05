@@ -215,7 +215,6 @@ const translations: Record<string, string> = {
   "Ej. Volkswagen Polo Track": "E.g. Volkswagen Polo Track",
   "Ej. AB123CD": "E.g. AB123CD",
   "Cada ": "Every ",
-  " h": " h",
 };
 export function translate(text: string, language: AppLanguage): string {
   return language === "en" ? (translations[text] ?? text) : text;
