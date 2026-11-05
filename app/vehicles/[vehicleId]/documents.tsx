@@ -3,7 +3,7 @@ import { useCallback, useState } from "react";
 import { Alert, Image, ScrollView, Text, TextInput, View, Pressable, StyleSheet, ActivityIndicator } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import type { DocumentKind, VehicleDocument } from "../../../src/types";
-import { addVehicleDocument, deleteVehicleDocument, getVehicleDocuments } from "../../../src/services/storage/documents";
+import { addVehicleDocument, updateVehicleDocument, deleteVehicleDocument, getVehicleDocuments } from "../../../src/services/storage/documents";
 import { cancelLocalNotification, scheduleDocumentExpiryAlert } from "../../../src/services/notifications";
 
 const kinds: DocumentKind[] = ["Permiso de transporte (aplicación)", "Permiso de transporte (turismo)", "RTO", "Seguro", "Pago de patente", "Cédula de GNC", "Cédula verde o azul", "Otro documento"];
@@ -17,7 +17,7 @@ export default function DocumentsScreen() {
   const [customName, setCustomName] = useState("");
   const [expiry, setExpiry] = useState("");
   const [alertDays, setAlertDays] = useState(7);
-  const [photoUri, setPhotoUri] = useState<string | undefined>();
+  const [photoUri, setPhotoUri] = useState<string | undefined>();\n  const [editingDoc, setEditingDoc] = useState<VehicleDocument | null>(null);
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
@@ -80,7 +80,7 @@ export default function DocumentsScreen() {
       <View style={styles.row}>{alertOptions.map((days) => <Pressable key={days} onPress={() => setAlertDays(days)} style={[styles.alertChoice, alertDays === days && styles.selected]}><Text style={[styles.kindText, alertDays === days && styles.selectedText]}>{days} d</Text></Pressable>)}</View>
       <Pressable style={styles.photoButton} onPress={pickPhoto}><Text style={styles.photoText}>{photoUri ? "Cambiar foto adjunta" : "📷 Adjuntar foto del documento"}</Text></Pressable>
       {photoUri && <Image source={{ uri: photoUri }} style={styles.preview} resizeMode="contain" />}
-      <Pressable style={styles.button} onPress={saveDocument}><Text style={styles.buttonText}>Guardar documento</Text></Pressable>
+      <Pressable style={styles.button} onPress={saveDocument}><Text style={styles.buttonText}>{editingDoc ? "Actualizar documento" : "Guardar documento"}</Text></Pressable>\n      {editingDoc && <Pressable style={styles.deleteButton} onPress={() => { setEditingDoc(null); setKind(kinds[0]); setCustomName(""); setExpiry(""); setAlertDays(7); setPhotoUri(undefined); }}><Text style={styles.deleteText}>Cancelar edición</Text></Pressable>}
     </View>
     <Text style={styles.listTitle}>Documentos guardados</Text>
     {loading ? <ActivityIndicator color="#137C70" style={{ marginTop: 18 }} /> : documents.length === 0 ? <Text style={styles.caption}>Todavía no hay documentos registrados.</Text> : documents.map((doc) => <View key={doc.id} style={styles.savedCard}>
@@ -89,7 +89,7 @@ export default function DocumentsScreen() {
       <Text style={styles.savedDate}>Vencimiento: {doc.expiresAt} · {status(doc.expiresAt)}</Text>
       <Text style={styles.caption}>Alerta configurada: {doc.alertDays} días antes</Text>
       {doc.photoUri && <Image source={{ uri: doc.photoUri }} style={styles.preview} resizeMode="contain" />}
-      <Pressable style={styles.deleteButton} onPress={() => removeDocument(doc)}><Text style={styles.deleteText}>Eliminar documento</Text></Pressable>
+      <View style={{ flexDirection: "row", gap: 12 }}><Pressable style={styles.deleteButton} onPress={() => { setEditingDoc(doc); setKind(doc.kind); setCustomName(doc.customName ?? ""); setExpiry(doc.expiresAt); setAlertDays(doc.alertDays); setPhotoUri(doc.photoUri); }}><Text style={{ color: "#137C70", fontWeight: "700" }}>Editar</Text></Pressable><Pressable style={styles.deleteButton} onPress={() => removeDocument(doc)}><Text style={styles.deleteText}>Eliminar documento</Text></Pressable></View>
     </View>)}
     <Pressable style={styles.back} onPress={() => router.back()}><Text style={styles.backText}>Volver al vehículo</Text></Pressable>
   </ScrollView>;
