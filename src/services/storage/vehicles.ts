@@ -37,6 +37,7 @@ export async function deleteVehicle(vehicleId: string): Promise<void> {
   await AsyncStorage.multiRemove([
     `@autokeep/documents/${vehicleId}`,
     `@autokeep/mileage/${vehicleId}`,
-    `@autokeep/maintenance-settings/${vehicleId}`
+    `@autokeep/maintenance-settings/${vehicleId}`,
+    `@autokeep/service-records/${vehicleId}`
   ]);
 }
