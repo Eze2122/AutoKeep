@@ -324,6 +324,10 @@ export function useAppLanguage() {
     }).catch(() => {});
     return () => { active = false; };
   }, []));
+  const setAppLanguage = useCallback(async (next: AppLanguage) => {
+    await AsyncStorage.setItem("@autokeep/language", next);
+    setLanguage(next);
+  }, []);
   const t = useCallback((text: string) => translate(text, language), [language]);
-  return { language, t };
+  return { language, t, setAppLanguage };
 }
