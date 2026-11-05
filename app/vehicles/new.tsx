@@ -21,7 +21,7 @@ export default function NewVehicleScreen() {
     const cleanPlate = plate.trim().toUpperCase();
     const cleanDrivers = drivers.map((name) => name.trim()).filter(Boolean);
     if (!cleanModel || !cleanPlate || cleanDrivers.length === 0) {
-      Alert.alert("Datos incompletos", "Ingresá modelo, patente y al menos un chofer.");
+      Alert.alert(t("Datos incompletos"), t("Ingresá modelo, patente y al menos un chofer."));
       return;
     }
     setSaving(true);
@@ -35,7 +35,7 @@ export default function NewVehicleScreen() {
       });
       router.replace("/");
     } catch {
-      Alert.alert("No se pudo guardar", "Intentá nuevamente.");
+      Alert.alert(t("No se pudo guardar"), t("Intentá nuevamente."));
     } finally {
       setSaving(false);
     }
@@ -47,16 +47,16 @@ export default function NewVehicleScreen() {
       <Text style={styles.title}>{t("Agregar vehículo")}</Text>
       <Text style={styles.subtitle}>{t("Registrá los datos de tu vehículo y sus choferes.")}</Text>
       <Text style={styles.label}>{t("Modelo del vehículo")}</Text>
-      <TextInput value={model} onChangeText={setModel} placeholder="Ej. Volkswagen Polo Track" style={styles.input} />
+      <TextInput value={model} onChangeText={setModel} placeholder={t("Ej. Volkswagen Polo Track")} style={styles.input} />
       <Text style={styles.label}>{t("Patente")}</Text>
-      <TextInput value={plate} onChangeText={setPlate} placeholder="Ej. AB123CD" autoCapitalize="characters" style={styles.input} />
+      <TextInput value={plate} onChangeText={setPlate} placeholder={t("Ej. AB123CD")} autoCapitalize="characters" style={styles.input} />
       <Text style={styles.label}>{t("Choferes")}</Text>
       {drivers.map((name, index) => <View key={index}>
-        <Text style={styles.driverLabel}>Chofer {index + 1}</Text>
+        <Text style={styles.driverLabel}>{t("Chofer ")}{index + 1}</Text>
         <TextInput value={name} onChangeText={(value) => updateDriver(index, value)} placeholder={t("Nombre del chofer")} style={styles.input} />
       </View>)}
       <Pressable style={styles.secondary} onPress={addDriver}><Text style={styles.secondaryText}>{t("＋ Agregar otro chofer")}</Text></Pressable>
-      <Pressable disabled={saving} style={styles.button} onPress={handleSave}><Text style={styles.buttonText}>{saving ? "Guardando..." : "Guardar vehículo"}</Text></Pressable>
+      <Pressable disabled={saving} style={styles.button} onPress={handleSave}><Text style={styles.buttonText}>{saving ? t("Guardando...") : t("Guardar vehículo")}</Text></Pressable>
       <Pressable style={styles.back} onPress={() => router.back()}><Text style={styles.backText}>{t("Cancelar")}</Text></Pressable>
     </ScrollView>
   );
