@@ -40,16 +40,33 @@ export default function DocumentsScreen() {
 
   async function saveDocument() {
     if (!vehicleId) return;
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(expiry) || Number.isNaN(Date.parse(expiry))) {
+    const parsedDate = /^\d{4}-\d{2}-\d{2}$/.test(expiry) ? new Date(`${expiry}T00:00:00Z`) : null;
+    const validDate = parsedDate && !Number.isNaN(parsedDate.getTime()) && parsedDate.toISOString().slice(0, 10) === expiry;
+    if (!validDate) {
       Alert.alert(t("Fecha inválida"), t("Ingresá la fecha con formato AAAA-MM-DD. Ejemplo: 2027-04-22.")); return;
     }
     try {
       const displayName = customName.trim() || kind;
       const notificationId = await scheduleDocumentExpiryAlert(displayName, expiry, alertDays);
-      const doc: VehicleDocument = { id: `doc-${Date.now()}`, vehicleId, kind, customName: customName.trim() || undefined, expiresAt: expiry, alertDays, photoUri, notificationId };
-      await addVehicleDocument(doc);
-      setCustomName(""); setExpiry(""); setPhotoUri(undefined); setAlertDays(7); await refresh();
-      Alert.alert(t("Documento guardado"), t("Se guardó en la documentación de este vehículo."));
+      const doc: VehicleDocument = {
+        id: editingDoc?.id ?? `doc-${Date.now()}`,
+        vehicleId,
+        kind,
+        customName: customName.trim() || undefined,
+        expiresAt: expiry,
+        alertDays,
+        photoUri,
+        notificationId
+      };
+      if (editingDoc) {
+        await updateVehicleDocument(doc);
+        await cancelLocalNotification(editingDoc.notificationId);
+      } else {
+        await addVehicleDocument(doc);
+      }
+      setEditingDoc(null); setKind(kinds[0]); setCustomName(""); setExpiry(""); setPhotoUri(undefined); setAlertDays(7);
+      await refresh();
+      Alert.alert(t(editingDoc ? "Documento actualizado" : "Documento guardado"), t(editingDoc ? "Se actualizaron los datos y la alerta del documento." : "Se guardó en la documentación de este vehículo."));
     } catch { Alert.alert(t("Error"), t("No se pudo guardar el documento.")); }
   }
 
