@@ -39,12 +39,22 @@ export default function ServiceHistoryScreen() {
       Alert.alert(t("Costo inválido"), t("El costo debe ser un número positivo."));
       return;
     }
-    const record: ServiceRecord = { id: `service-${Date.now()}`, vehicleId, title: cleanTitle, category, odometerKm: odometer, performedAt: new Date().toISOString(), cost: amount, notes: notes.trim() || undefined };
+    const record: ServiceRecord = {
+      id: editingRecord?.id ?? `service-${Date.now()}`,
+      vehicleId,
+      title: cleanTitle,
+      category,
+      odometerKm: odometer,
+      performedAt: editingRecord?.performedAt ?? new Date().toISOString(),
+      cost: amount,
+      notes: notes.trim() || undefined
+    };
     try {
-      await addServiceRecord(record);
-      setTitle(""); setKm(""); setCost(""); setNotes("");
+      if (editingRecord) await updateServiceRecord(record);
+      else await addServiceRecord(record);
+      setEditingRecord(null); setTitle(""); setKm(""); setCost(""); setNotes(""); setCategory("oil");
       await refresh();
-      Alert.alert(t("Servicio registrado"), t("Se agregó al historial de este vehículo."));
+      Alert.alert(t(editingRecord ? "Servicio actualizado" : "Servicio registrado"), t(editingRecord ? "Se actualizó el registro del servicio." : "Se agregó al historial de este vehículo."));
     } catch { Alert.alert(t("Error"), t("No se pudo guardar el servicio.")); }
   }
 
