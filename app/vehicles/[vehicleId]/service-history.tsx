@@ -3,6 +3,7 @@ import { useCallback, useState } from "react";
 import { Alert, ScrollView, Text, TextInput, View, Pressable, StyleSheet } from "react-native";
 import { addServiceRecord, updateServiceRecord, deleteServiceRecord, getServiceRecords, type ServiceRecord } from "../../../src/services/storage/service-records";
 
+import { useAppLanguage } from "../../../src/services/i18n";
 const categories: { value: ServiceRecord["category"]; label: string }[] = [
   { value: "oil", label: "Aceite" }, { value: "filters", label: "Filtros" },
   { value: "brakes", label: "Frenos" }, { value: "tires", label: "Neumáticos" },
@@ -18,7 +19,8 @@ export default function ServiceHistoryScreen() {
   const [category, setCategory] = useState<ServiceRecord["category"]>("oil");
   const [km, setKm] = useState("");
   const [cost, setCost] = useState("");
-  const [notes, setNotes] = useState("");\n  const [editingRecord, setEditingRecord] = useState<ServiceRecord | null>(null);
+  const [notes, setNotes] = useState("");
+  const [editingRecord, setEditingRecord] = useState<ServiceRecord | null>(null);
 
   const refresh = useCallback(async () => {
     if (vehicleId) setRecords(await getServiceRecords(vehicleId));
@@ -72,7 +74,8 @@ export default function ServiceHistoryScreen() {
       <TextInput value={cost} onChangeText={setCost} keyboardType="decimal-pad" placeholder="ARS" style={styles.input}/>
       <Text style={styles.label}>{t("Notas (opcional)")}</Text>
       <TextInput value={notes} onChangeText={setNotes} multiline placeholder="Repuestos, taller, observaciones…" style={[styles.input, { minHeight: 75 }]}/>
-      <Pressable style={styles.button} onPress={save}><Text style={styles.buttonText}>{editingRecord ? "Actualizar servicio" : "Guardar servicio"}</Text></Pressable>\n      {editingRecord && <Pressable style={styles.back} onPress={() => { setEditingRecord(null); setTitle(""); setKm(""); setCost(""); setNotes(""); setCategory("oil"); }}><Text style={styles.backText}>{t("Cancelar edición")}</Text></Pressable>}
+      <Pressable style={styles.button} onPress={save}><Text style={styles.buttonText}>{editingRecord ? "Actualizar servicio" : "Guardar servicio"}</Text></Pressable>
+      {editingRecord && <Pressable style={styles.back} onPress={() => { setEditingRecord(null); setTitle(""); setKm(""); setCost(""); setNotes(""); setCategory("oil"); }}><Text style={styles.backText}>{t("Cancelar edición")}</Text></Pressable>}
     </View>
     <View style={styles.card}>
       <Text style={styles.sectionTitle}>📚 Servicios anteriores ({records.length})</Text>
