@@ -23,7 +23,7 @@ export default function MaintenanceScreen() {
       const [records, prefs] = await Promise.all([getMileageEntries(vehicleId), getMaintenanceSettings(vehicleId)]);
       setEntries(records); setSettings(prefs);
       setOilReading(prefs.lastOilChangeKm === null ? "" : String(prefs.lastOilChangeKm));
-    } catch { Alert.alert("Error", "No se pudieron cargar los datos de mantenimiento."); }
+    } catch { Alert.alert(t("Error"), t("No se pudieron cargar los datos de mantenimiento.")); }
     finally { setLoading(false); }
   }, [vehicleId]);
   useFocusEffect(useCallback(() => { refresh(); }, [refresh]));
@@ -46,66 +46,66 @@ export default function MaintenanceScreen() {
       await saveMaintenanceSettings(vehicleId, persisted);
       setSettings(persisted);
       if (next.mileageAlertsEnabled && !mileageNotificationId) {
-        Alert.alert("Recordatorio no activado", "No se concedió permiso para las notificaciones. Podés habilitarlo desde los ajustes del teléfono.");
+        Alert.alert(t("Recordatorio no activado"), t("No se concedió permiso para las notificaciones. Podés habilitarlo desde los ajustes del teléfono."));
       }
     } catch {
-      Alert.alert("Error", "No se pudo guardar o programar el recordatorio.");
+      Alert.alert(t("Error"), t("No se pudo guardar o programar el recordatorio."));
     }
   }
 
   async function recordMileage() {
     const value = Number(reading.replace(",", "."));
     if (!Number.isFinite(value) || value <= 0 || !vehicleId) {
-      Alert.alert("Kilometraje inválido", "Ingresá un odómetro válido en kilómetros.");
+      Alert.alert(t("Kilometraje inválido"), t("Ingresá un odómetro válido en kilómetros."));
       return;
     }
     if (latest && value < latest.odometerKm) {
-      Alert.alert("Lectura menor", "El nuevo kilometraje no puede ser menor que el último registrado.");
+      Alert.alert(t("Lectura menor"), t("El nuevo kilometraje no puede ser menor que el último registrado."));
       return;
     }
     const entry: MileageEntry = { id: `mile-${Date.now()}`, vehicleId, odometerKm: value, recordedAt: new Date().toISOString() };
-    try { await addMileageEntry(entry); setReading(""); await refresh(); Alert.alert("Registro guardado", "Se guardó el kilometraje con fecha y hora."); }
-    catch { Alert.alert("Error", "No se pudo guardar el registro."); }
+    try { await addMileageEntry(entry); setReading(""); await refresh(); Alert.alert(t("Registro guardado"), t("Se guardó el kilometraje con fecha y hora.")); }
+    catch { Alert.alert(t("Error"), t("No se pudo guardar el registro.")); }
   }
 
   function confirmDeleteMileage(entry: MileageEntry) {
-    Alert.alert("Eliminar lectura", `¿Eliminar el registro de ${entry.odometerKm.toLocaleString("es-AR")} km?`, [
+    Alert.alert(t("Eliminar lectura"), `${t("¿Eliminar el registro de")} ${entry.odometerKm.toLocaleString("es-AR")} km?`, [
       { text: "Cancelar", style: "cancel" },
       { text: "Eliminar", style: "destructive", onPress: async () => {
         try { if (vehicleId) await deleteMileageEntry(vehicleId, entry.id); await refresh(); }
-        catch { Alert.alert("Error", "No se pudo eliminar la lectura."); }
+        catch { Alert.alert(t("Error"), t("No se pudo eliminar la lectura.")); }
       }}
     ]);
   }
 
   async function saveOilChange() {
     const value = Number(oilReading.replace(",", "."));
-    if (!Number.isFinite(value) || value <= 0) { Alert.alert("Kilometraje inválido", "Ingresá los km en los que se hizo el cambio de aceite."); return; }
-    if (latest && value > latest.odometerKm) { Alert.alert("Revisá el dato", "El kilometraje del cambio de aceite no puede superar el último odómetro registrado."); return; }
+    if (!Number.isFinite(value) || value <= 0) { Alert.alert(t("Kilometraje inválido"), t("Ingresá los km en los que se hizo el cambio de aceite.")); return; }
+    if (latest && value > latest.odometerKm) { Alert.alert(t("Revisá el dato"), t("El kilometraje del cambio de aceite no puede superar el último odómetro registrado.")); return; }
     await changeSettings({ ...settings, lastOilChangeKm: value });
-    Alert.alert("Cambio de aceite guardado", `Próximo cambio estimado a los ${(value + settings.oilIntervalKm).toLocaleString("es-AR")} km.`);
+    Alert.alert(t("Cambio de aceite guardado"), `${t("Próximo cambio estimado a los")} ${(value + settings.oilIntervalKm).toLocaleString("es-AR")} km.`);
   }
 
   return <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
     <Text style={styles.brand}>AutoKeep</Text>
     <Text style={styles.title}>{t("Mantenimiento")}</Text>
-    <Text style={styles.caption}>Los registros quedan vinculados a este vehículo.</Text>
+    <Text style={styles.caption}>{t("Los registros quedan vinculados a este vehículo.")}</Text>
     {loading ? <ActivityIndicator color="#137C70" style={{ marginTop: 30 }} /> : <>
       <View style={styles.card}>
-        <Text style={styles.sectionTitle}>📍 Registro de kilometraje</Text>
-        <Text style={styles.caption}>Ingresá manualmente el odómetro. La fecha y hora se guardan automáticamente.</Text>
+        <Text style={styles.sectionTitle}>{t("📍 Registro de kilometraje")}</Text>
+        <Text style={styles.caption}>{t("Ingresá manualmente el odómetro. La fecha y hora se guardan automáticamente.")}</Text>
         <Text style={styles.label}>{t("Frecuencia de recordatorio")}</Text>
         <View style={styles.row}>
-          {[12,24].map((hours) => <Pressable key={hours} style={[styles.choice, settings.mileageReminderHours === hours && styles.choiceActive]} onPress={() => changeSettings({ ...settings, mileageReminderHours: hours as 12 | 24 })}><Text style={[styles.choiceText, settings.mileageReminderHours === hours && styles.choiceTextActive]}>Cada {hours} h</Text></Pressable>)}
+          {[12,24].map((hours) => <Pressable key={hours} style={[styles.choice, settings.mileageReminderHours === hours && styles.choiceActive]} onPress={() => changeSettings({ ...settings, mileageReminderHours: hours as 12 | 24 })}><Text style={[styles.choiceText, settings.mileageReminderHours === hours && styles.choiceTextActive]}>{t("Cada ")}{hours} {t(" h")}</Text></Pressable>)}
         </View>
         <View style={styles.switchRow}><Text style={styles.label}>{t("Alertas de kilometraje")}</Text><Switch value={settings.mileageAlertsEnabled} onValueChange={(value) => changeSettings({ ...settings, mileageAlertsEnabled: value })} trackColor={{ true: "#137C70" }} /></View>
         <Text style={styles.label}>{t("Odómetro actual (km)")}</Text>
         <TextInput value={reading} onChangeText={setReading} keyboardType="decimal-pad" placeholder="Ej. 253931" style={styles.input}/>
-        <Pressable style={styles.button} onPress={recordMileage}><Text style={styles.buttonText}>{editingEntry ? "Actualizar lectura" : "Guardar kilometraje"}</Text></Pressable>
+        <Pressable style={styles.button} onPress={recordMileage}><Text style={styles.buttonText}>{editingEntry ? t("Actualizar lectura") : t("Guardar kilometraje")}</Text></Pressable>
         {editingEntry && <Pressable style={styles.back} onPress={() => { setEditingEntry(null); setReading(""); }}><Text style={styles.backText}>{t("Cancelar edición")}</Text></Pressable>}
-        <View style={styles.metric}><Text style={styles.metricLabel}>{t("Última lectura")}</Text><Text style={styles.metricValue}>{latest ? `${latest.odometerKm.toLocaleString("es-AR")} km` : "Sin registros"}</Text></View>
-        <View style={styles.metric}><Text style={styles.metricLabel}>Km recorridos desde registro anterior</Text><Text style={styles.metricValue}>{driven === null ? "Necesitás 2 registros" : `${driven.toLocaleString("es-AR")} km`}</Text></View>
-        {latest && <Text style={styles.caption}>Último registro: {new Date(latest.recordedAt).toLocaleString("es-AR")}</Text>}
+        <View style={styles.metric}><Text style={styles.metricLabel}>{t("Última lectura")}</Text><Text style={styles.metricValue}>{latest ? `${latest.odometerKm.toLocaleString("es-AR")} km` : t("Sin registros")}</Text></View>
+        <View style={styles.metric}><Text style={styles.metricLabel}>{t("Km recorridos desde registro anterior")}</Text><Text style={styles.metricValue}>{driven === null ? t("Necesitás 2 registros") : `${driven.toLocaleString("es-AR")} km`}</Text></View>
+        {latest && <Text style={styles.caption}>{t("Último registro:")} {new Date(latest.recordedAt).toLocaleString("es-AR")}</Text>}
         <Text style={styles.label}>{t("Lecturas anteriores")}</Text>
         {!entries.length ? <Text style={styles.caption}>{t("Sin historial todavía.")}</Text> : [...entries].reverse().map((entry) => <View key={entry.id} style={styles.mileageRecord}>
           <View style={{ flex: 1 }}>
@@ -118,7 +118,7 @@ export default function MaintenanceScreen() {
 
       <View style={styles.card}>
         <Text style={styles.sectionTitle}>{t("🛢️ Cambio de aceite")}</Text>
-        <Text style={styles.caption}>Definí el intervalo y el kilometraje en que se realizó el último cambio.</Text>
+        <Text style={styles.caption}>{t("Definí el intervalo y el kilometraje en que se realizó el último cambio.")}</Text>
         <Text style={styles.label}>{t("Intervalo recomendado")}</Text>
         <View style={styles.row}>
           {[8000,13000].map((km) => <Pressable key={km} style={[styles.choice, settings.oilIntervalKm === km && styles.choiceActive]} onPress={() => changeSettings({ ...settings, oilIntervalKm: km as 8000 | 13000 })}><Text style={[styles.choiceText, settings.oilIntervalKm === km && styles.choiceTextActive]}>{km.toLocaleString("es-AR")} km</Text></Pressable>)}
@@ -126,7 +126,7 @@ export default function MaintenanceScreen() {
         <Text style={styles.label}>{t("Km del último cambio de aceite")}</Text>
         <TextInput value={oilReading} onChangeText={setOilReading} keyboardType="decimal-pad" placeholder="Ej. 245000" style={styles.input}/>
         <Pressable style={styles.secondaryButton} onPress={saveOilChange}><Text style={styles.secondaryText}>{t("Guardar cambio de aceite")}</Text></Pressable>
-        <View style={styles.metric}><Text style={styles.metricLabel}>{t("Próximo cambio")}</Text><Text style={styles.metricValue}>{oilDueAt === null ? "Registrá el último cambio" : `${oilDueAt.toLocaleString("es-AR")} km`}</Text></View>
+        <View style={styles.metric}><Text style={styles.metricLabel}>{t("Próximo cambio")}</Text><Text style={styles.metricValue}>{oilDueAt === null ? t("Registrá el último cambio") : `${oilDueAt.toLocaleString("es-AR")} km`}</Text></View>
         <View style={styles.metric}><Text style={styles.metricLabel}>{t("Estado")}</Text><Text style={[styles.metricValue, oilRemaining !== null && oilRemaining <= 0 && { color: "#B42318" }]}>{oilRemaining === null ? "—" : oilRemaining <= 0 ? `Vencido por ${Math.abs(oilRemaining).toLocaleString("es-AR")} km` : `Restan ${oilRemaining.toLocaleString("es-AR")} km`}</Text></View>
       </View>
     </>}
