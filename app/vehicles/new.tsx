@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Alert, ScrollView, Text, TextInput, View, StyleSheet, Pressable } from "react-native";
 import { saveVehicle } from "../../src/services/storage/vehicles";
 
+import { useAppLanguage } from "../../src/services/i18n";
 export default function NewVehicleScreen() {
   const { t } = useAppLanguage();
   const [model, setModel] = useState("");
