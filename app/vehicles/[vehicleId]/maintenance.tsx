@@ -6,6 +6,7 @@ import type { MileageEntry } from "../../../src/types";
 import { cancelLocalNotification, scheduleMileageReminder } from "../../../src/services/notifications";
 
 export default function MaintenanceScreen() {
+  const { t } = useAppLanguage();
   const params = useLocalSearchParams<{ vehicleId: string | string[] }>();
   const vehicleId = Array.isArray(params.vehicleId) ? params.vehicleId[0] : params.vehicleId;
   const [entries, setEntries] = useState<MileageEntry[]>([]);
@@ -85,48 +86,48 @@ export default function MaintenanceScreen() {
 
   return <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
     <Text style={styles.brand}>AutoKeep</Text>
-    <Text style={styles.title}>Mantenimiento</Text>
+    <Text style={styles.title}>{t("Mantenimiento")}</Text>
     <Text style={styles.caption}>Los registros quedan vinculados a este vehículo.</Text>
     {loading ? <ActivityIndicator color="#137C70" style={{ marginTop: 30 }} /> : <>
       <View style={styles.card}>
         <Text style={styles.sectionTitle}>📍 Registro de kilometraje</Text>
         <Text style={styles.caption}>Ingresá manualmente el odómetro. La fecha y hora se guardan automáticamente.</Text>
-        <Text style={styles.label}>Frecuencia de recordatorio</Text>
+        <Text style={styles.label}>{t("Frecuencia de recordatorio")}</Text>
         <View style={styles.row}>
           {[12,24].map((hours) => <Pressable key={hours} style={[styles.choice, settings.mileageReminderHours === hours && styles.choiceActive]} onPress={() => changeSettings({ ...settings, mileageReminderHours: hours as 12 | 24 })}><Text style={[styles.choiceText, settings.mileageReminderHours === hours && styles.choiceTextActive]}>Cada {hours} h</Text></Pressable>)}
         </View>
-        <View style={styles.switchRow}><Text style={styles.label}>Alertas de kilometraje</Text><Switch value={settings.mileageAlertsEnabled} onValueChange={(value) => changeSettings({ ...settings, mileageAlertsEnabled: value })} trackColor={{ true: "#137C70" }} /></View>
-        <Text style={styles.label}>Odómetro actual (km)</Text>
+        <View style={styles.switchRow}><Text style={styles.label}>{t("Alertas de kilometraje")}</Text><Switch value={settings.mileageAlertsEnabled} onValueChange={(value) => changeSettings({ ...settings, mileageAlertsEnabled: value })} trackColor={{ true: "#137C70" }} /></View>
+        <Text style={styles.label}>{t("Odómetro actual (km)")}</Text>
         <TextInput value={reading} onChangeText={setReading} keyboardType="decimal-pad" placeholder="Ej. 253931" style={styles.input}/>
-        <Pressable style={styles.button} onPress={recordMileage}><Text style={styles.buttonText}>{editingEntry ? "Actualizar lectura" : "Guardar kilometraje"}</Text></Pressable>\n        {editingEntry && <Pressable style={styles.back} onPress={() => { setEditingEntry(null); setReading(""); }}><Text style={styles.backText}>Cancelar edición</Text></Pressable>}
-        <View style={styles.metric}><Text style={styles.metricLabel}>Última lectura</Text><Text style={styles.metricValue}>{latest ? `${latest.odometerKm.toLocaleString("es-AR")} km` : "Sin registros"}</Text></View>
+        <Pressable style={styles.button} onPress={recordMileage}><Text style={styles.buttonText}>{editingEntry ? "Actualizar lectura" : "Guardar kilometraje"}</Text></Pressable>\n        {editingEntry && <Pressable style={styles.back} onPress={() => { setEditingEntry(null); setReading(""); }}><Text style={styles.backText}>{t("Cancelar edición")}</Text></Pressable>}
+        <View style={styles.metric}><Text style={styles.metricLabel}>{t("Última lectura")}</Text><Text style={styles.metricValue}>{latest ? `${latest.odometerKm.toLocaleString("es-AR")} km` : "Sin registros"}</Text></View>
         <View style={styles.metric}><Text style={styles.metricLabel}>Km recorridos desde registro anterior</Text><Text style={styles.metricValue}>{driven === null ? "Necesitás 2 registros" : `${driven.toLocaleString("es-AR")} km`}</Text></View>
         {latest && <Text style={styles.caption}>Último registro: {new Date(latest.recordedAt).toLocaleString("es-AR")}</Text>}
-        <Text style={styles.label}>Lecturas anteriores</Text>
-        {!entries.length ? <Text style={styles.caption}>Sin historial todavía.</Text> : [...entries].reverse().map((entry) => <View key={entry.id} style={styles.mileageRecord}>
+        <Text style={styles.label}>{t("Lecturas anteriores")}</Text>
+        {!entries.length ? <Text style={styles.caption}>{t("Sin historial todavía.")}</Text> : [...entries].reverse().map((entry) => <View key={entry.id} style={styles.mileageRecord}>
           <View style={{ flex: 1 }}>
             <Text style={styles.metricValue}>{entry.odometerKm.toLocaleString("es-AR")} km</Text>
             <Text style={styles.caption}>{new Date(entry.recordedAt).toLocaleString("es-AR")}</Text>
           </View>
-          <View style={{ flexDirection: "row" }}><Pressable onPress={() => { setEditingEntry(entry); setReading(String(entry.odometerKm)); }} style={styles.deleteButton}><Text style={{ color: "#137C70", fontWeight: "700" }}>Editar</Text></Pressable><Pressable onPress={() => confirmDeleteMileage(entry)} style={styles.deleteButton}><Text style={styles.deleteText}>Eliminar</Text></Pressable></View>
+          <View style={{ flexDirection: "row" }}><Pressable onPress={() => { setEditingEntry(entry); setReading(String(entry.odometerKm)); }} style={styles.deleteButton}><Text style={{ color: "#137C70", fontWeight: "700" }}>{t("Editar")}</Text></Pressable><Pressable onPress={() => confirmDeleteMileage(entry)} style={styles.deleteButton}><Text style={styles.deleteText}>{t("Eliminar")}</Text></Pressable></View>
         </View>)}
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.sectionTitle}>🛢️ Cambio de aceite</Text>
+        <Text style={styles.sectionTitle}>{t("🛢️ Cambio de aceite")}</Text>
         <Text style={styles.caption}>Definí el intervalo y el kilometraje en que se realizó el último cambio.</Text>
-        <Text style={styles.label}>Intervalo recomendado</Text>
+        <Text style={styles.label}>{t("Intervalo recomendado")}</Text>
         <View style={styles.row}>
           {[8000,13000].map((km) => <Pressable key={km} style={[styles.choice, settings.oilIntervalKm === km && styles.choiceActive]} onPress={() => changeSettings({ ...settings, oilIntervalKm: km as 8000 | 13000 })}><Text style={[styles.choiceText, settings.oilIntervalKm === km && styles.choiceTextActive]}>{km.toLocaleString("es-AR")} km</Text></Pressable>)}
         </View>
-        <Text style={styles.label}>Km del último cambio de aceite</Text>
+        <Text style={styles.label}>{t("Km del último cambio de aceite")}</Text>
         <TextInput value={oilReading} onChangeText={setOilReading} keyboardType="decimal-pad" placeholder="Ej. 245000" style={styles.input}/>
-        <Pressable style={styles.secondaryButton} onPress={saveOilChange}><Text style={styles.secondaryText}>Guardar cambio de aceite</Text></Pressable>
-        <View style={styles.metric}><Text style={styles.metricLabel}>Próximo cambio</Text><Text style={styles.metricValue}>{oilDueAt === null ? "Registrá el último cambio" : `${oilDueAt.toLocaleString("es-AR")} km`}</Text></View>
-        <View style={styles.metric}><Text style={styles.metricLabel}>Estado</Text><Text style={[styles.metricValue, oilRemaining !== null && oilRemaining <= 0 && { color: "#B42318" }]}>{oilRemaining === null ? "—" : oilRemaining <= 0 ? `Vencido por ${Math.abs(oilRemaining).toLocaleString("es-AR")} km` : `Restan ${oilRemaining.toLocaleString("es-AR")} km`}</Text></View>
+        <Pressable style={styles.secondaryButton} onPress={saveOilChange}><Text style={styles.secondaryText}>{t("Guardar cambio de aceite")}</Text></Pressable>
+        <View style={styles.metric}><Text style={styles.metricLabel}>{t("Próximo cambio")}</Text><Text style={styles.metricValue}>{oilDueAt === null ? "Registrá el último cambio" : `${oilDueAt.toLocaleString("es-AR")} km`}</Text></View>
+        <View style={styles.metric}><Text style={styles.metricLabel}>{t("Estado")}</Text><Text style={[styles.metricValue, oilRemaining !== null && oilRemaining <= 0 && { color: "#B42318" }]}>{oilRemaining === null ? "—" : oilRemaining <= 0 ? `Vencido por ${Math.abs(oilRemaining).toLocaleString("es-AR")} km` : `Restan ${oilRemaining.toLocaleString("es-AR")} km`}</Text></View>
       </View>
     </>}
-    <Pressable style={styles.back} onPress={() => router.back()}><Text style={styles.backText}>Volver al vehículo</Text></Pressable>
+    <Pressable style={styles.back} onPress={() => router.back()}><Text style={styles.backText}>{t("Volver al vehículo")}</Text></Pressable>
   </ScrollView>;
 }
 const styles = StyleSheet.create({
