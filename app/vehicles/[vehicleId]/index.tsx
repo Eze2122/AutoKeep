@@ -3,6 +3,7 @@ import { Text, View, Pressable, StyleSheet } from "react-native";
 
 const sections = [
   { title: "Mantenimiento", route: "maintenance", icon: "🛠️", subtitle: "Kilometraje y cambio de aceite" },
+  { title: "Historial unificado", route: "timeline", icon: "🗓️", subtitle: "Actividad del vehículo: odómetro y servicios" },
   { title: "Historial de servicios", route: "service-history", icon: "📚", subtitle: "Aceite, filtros, frenos, neumáticos y costos" },
   { title: "Documentación", route: "documents", icon: "📄", subtitle: "Vencimientos y archivos" },
   { title: "Configuración", route: "settings", icon: "⚙️", subtitle: "Vehículo, choferes y preferencias" }
