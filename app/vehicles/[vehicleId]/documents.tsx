@@ -10,6 +10,7 @@ const kinds: DocumentKind[] = ["Permiso de transporte (aplicación)", "Permiso d
 const alertOptions = [1, 3, 7, 15, 30];
 
 export default function DocumentsScreen() {
+  const { t } = useAppLanguage();
   const params = useLocalSearchParams<{ vehicleId: string | string[] }>();
   const vehicleId = Array.isArray(params.vehicleId) ? params.vehicleId[0] : params.vehicleId;
   const [documents, setDocuments] = useState<VehicleDocument[]>([]);
@@ -66,32 +67,32 @@ export default function DocumentsScreen() {
 
   return <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
     <Text style={styles.brand}>AutoKeep</Text>
-    <Text style={styles.title}>Documentación</Text>
+    <Text style={styles.title}>{t("Documentación")}</Text>
     <Text style={styles.caption}>Guardá los documentos y controlá sus vencimientos.</Text>
     <View style={styles.card}>
-      <Text style={styles.sectionTitle}>＋ Agregar documento</Text>
-      <Text style={styles.label}>Tipo de documento</Text>
+      <Text style={styles.sectionTitle}>{t("＋ Agregar documento")}</Text>
+      <Text style={styles.label}>{t("Tipo de documento")}</Text>
       <View style={styles.kindList}>{kinds.map((item) => <Pressable key={item} onPress={() => setKind(item)} style={[styles.kindChoice, kind === item && styles.selected]}><Text style={[styles.kindText, kind === item && styles.selectedText]}>{item}</Text></Pressable>)}</View>
-      <Text style={styles.label}>Nombre personalizado (opcional)</Text>
+      <Text style={styles.label}>{t("Nombre personalizado (opcional)")}</Text>
       <TextInput value={customName} onChangeText={setCustomName} placeholder="Ej. Seguro La Caja" style={styles.input}/>
-      <Text style={styles.label}>Fecha de vencimiento (AAAA-MM-DD)</Text>
+      <Text style={styles.label}>{t("Fecha de vencimiento (AAAA-MM-DD)")}</Text>
       <TextInput value={expiry} onChangeText={setExpiry} placeholder="2027-04-22" keyboardType="numbers-and-punctuation" style={styles.input}/>
-      <Text style={styles.label}>Avisar antes del vencimiento</Text>
+      <Text style={styles.label}>{t("Avisar antes del vencimiento")}</Text>
       <View style={styles.row}>{alertOptions.map((days) => <Pressable key={days} onPress={() => setAlertDays(days)} style={[styles.alertChoice, alertDays === days && styles.selected]}><Text style={[styles.kindText, alertDays === days && styles.selectedText]}>{days} d</Text></Pressable>)}</View>
       <Pressable style={styles.photoButton} onPress={pickPhoto}><Text style={styles.photoText}>{photoUri ? "Cambiar foto adjunta" : "📷 Adjuntar foto del documento"}</Text></Pressable>
       {photoUri && <Image source={{ uri: photoUri }} style={styles.preview} resizeMode="contain" />}
-      <Pressable style={styles.button} onPress={saveDocument}><Text style={styles.buttonText}>{editingDoc ? "Actualizar documento" : "Guardar documento"}</Text></Pressable>\n      {editingDoc && <Pressable style={styles.deleteButton} onPress={() => { setEditingDoc(null); setKind(kinds[0]); setCustomName(""); setExpiry(""); setAlertDays(7); setPhotoUri(undefined); }}><Text style={styles.deleteText}>Cancelar edición</Text></Pressable>}
+      <Pressable style={styles.button} onPress={saveDocument}><Text style={styles.buttonText}>{editingDoc ? "Actualizar documento" : "Guardar documento"}</Text></Pressable>\n      {editingDoc && <Pressable style={styles.deleteButton} onPress={() => { setEditingDoc(null); setKind(kinds[0]); setCustomName(""); setExpiry(""); setAlertDays(7); setPhotoUri(undefined); }}><Text style={styles.deleteText}>{t("Cancelar edición")}</Text></Pressable>}
     </View>
-    <Text style={styles.listTitle}>Documentos guardados</Text>
+    <Text style={styles.listTitle}>{t("Documentos guardados")}</Text>
     {loading ? <ActivityIndicator color="#137C70" style={{ marginTop: 18 }} /> : documents.length === 0 ? <Text style={styles.caption}>Todavía no hay documentos registrados.</Text> : documents.map((doc) => <View key={doc.id} style={styles.savedCard}>
       <Text style={styles.savedTitle}>{doc.customName || doc.kind}</Text>
       {doc.customName && <Text style={styles.caption}>{doc.kind}</Text>}
       <Text style={styles.savedDate}>Vencimiento: {doc.expiresAt} · {status(doc.expiresAt)}</Text>
       <Text style={styles.caption}>Alerta configurada: {doc.alertDays} días antes</Text>
       {doc.photoUri && <Image source={{ uri: doc.photoUri }} style={styles.preview} resizeMode="contain" />}
-      <View style={{ flexDirection: "row", gap: 12 }}><Pressable style={styles.deleteButton} onPress={() => { setEditingDoc(doc); setKind(doc.kind); setCustomName(doc.customName ?? ""); setExpiry(doc.expiresAt); setAlertDays(doc.alertDays); setPhotoUri(doc.photoUri); }}><Text style={{ color: "#137C70", fontWeight: "700" }}>Editar</Text></Pressable><Pressable style={styles.deleteButton} onPress={() => removeDocument(doc)}><Text style={styles.deleteText}>Eliminar documento</Text></Pressable></View>
+      <View style={{ flexDirection: "row", gap: 12 }}><Pressable style={styles.deleteButton} onPress={() => { setEditingDoc(doc); setKind(doc.kind); setCustomName(doc.customName ?? ""); setExpiry(doc.expiresAt); setAlertDays(doc.alertDays); setPhotoUri(doc.photoUri); }}><Text style={{ color: "#137C70", fontWeight: "700" }}>{t("Editar")}</Text></Pressable><Pressable style={styles.deleteButton} onPress={() => removeDocument(doc)}><Text style={styles.deleteText}>{t("Eliminar documento")}</Text></Pressable></View>
     </View>)}
-    <Pressable style={styles.back} onPress={() => router.back()}><Text style={styles.backText}>Volver al vehículo</Text></Pressable>
+    <Pressable style={styles.back} onPress={() => router.back()}><Text style={styles.backText}>{t("Volver al vehículo")}</Text></Pressable>
   </ScrollView>;
 }
 const styles = StyleSheet.create({
