@@ -38,7 +38,7 @@ export default function HomeScreen() {
           <Pressable style={styles.vehicle}>
             <Text style={styles.vehicleName}>{vehicle.model}</Text>
             <Text style={styles.plate}>{vehicle.plate}</Text>
-            <Text style={styles.driverNames}>Choferes: {vehicle.drivers.map((driver) => driver.name).join(", ") || "Sin choferes"}</Text>
+            <Text style={styles.driverNames}>{t("Choferes: ")}{vehicle.drivers.map((driver) => driver.name).join(", ") || t("Sin choferes")}</Text>
           </Pressable>
         </Link>
       ))}
