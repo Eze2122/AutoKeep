@@ -4,6 +4,7 @@ import { Alert, ScrollView, Text, TextInput, View, StyleSheet, Pressable } from 
 import { saveVehicle } from "../../src/services/storage/vehicles";
 
 export default function NewVehicleScreen() {
+  const { t } = useAppLanguage();
   const [model, setModel] = useState("");
   const [plate, setPlate] = useState("");
   const [drivers, setDrivers] = useState([""]);
@@ -42,20 +43,20 @@ export default function NewVehicleScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
       <Text style={styles.brand}>AutoKeep</Text>
-      <Text style={styles.title}>Agregar vehículo</Text>
-      <Text style={styles.subtitle}>Registrá los datos de tu vehículo y sus choferes.</Text>
-      <Text style={styles.label}>Modelo del vehículo</Text>
+      <Text style={styles.title}>{t("Agregar vehículo")}</Text>
+      <Text style={styles.subtitle}>{t("Registrá los datos de tu vehículo y sus choferes.")}</Text>
+      <Text style={styles.label}>{t("Modelo del vehículo")}</Text>
       <TextInput value={model} onChangeText={setModel} placeholder="Ej. Volkswagen Polo Track" style={styles.input} />
-      <Text style={styles.label}>Patente</Text>
+      <Text style={styles.label}>{t("Patente")}</Text>
       <TextInput value={plate} onChangeText={setPlate} placeholder="Ej. AB123CD" autoCapitalize="characters" style={styles.input} />
-      <Text style={styles.label}>Choferes</Text>
+      <Text style={styles.label}>{t("Choferes")}</Text>
       {drivers.map((name, index) => <View key={index}>
         <Text style={styles.driverLabel}>Chofer {index + 1}</Text>
-        <TextInput value={name} onChangeText={(value) => updateDriver(index, value)} placeholder="Nombre del chofer" style={styles.input} />
+        <TextInput value={name} onChangeText={(value) => updateDriver(index, value)} placeholder={t("Nombre del chofer")} style={styles.input} />
       </View>)}
-      <Pressable style={styles.secondary} onPress={addDriver}><Text style={styles.secondaryText}>＋ Agregar otro chofer</Text></Pressable>
+      <Pressable style={styles.secondary} onPress={addDriver}><Text style={styles.secondaryText}>{t("＋ Agregar otro chofer")}</Text></Pressable>
       <Pressable disabled={saving} style={styles.button} onPress={handleSave}><Text style={styles.buttonText}>{saving ? "Guardando..." : "Guardar vehículo"}</Text></Pressable>
-      <Pressable style={styles.back} onPress={() => router.back()}><Text style={styles.backText}>Cancelar</Text></Pressable>
+      <Pressable style={styles.back} onPress={() => router.back()}><Text style={styles.backText}>{t("Cancelar")}</Text></Pressable>
     </ScrollView>
   );
 }
