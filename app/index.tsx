@@ -4,6 +4,7 @@ import { ScrollView, Text, View, Pressable, StyleSheet, ActivityIndicator } from
 import { getVehicles } from "../src/services/storage/vehicles";
 import type { Vehicle } from "../src/types";
 
+import { useAppLanguage } from "../src/services/i18n";
 export default function HomeScreen() {
   const { t } = useAppLanguage();
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
