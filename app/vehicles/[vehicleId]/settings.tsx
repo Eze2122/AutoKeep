@@ -3,10 +3,10 @@ import { useCallback, useState } from "react";
 import { Alert, ScrollView, Text, View, Pressable, StyleSheet, TextInput } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getMileageEntries } from "../../../src/services/storage/maintenance";
-import { getVehicles, updateVehicle, deleteVehicle } from "../../../src/services/storage/vehicles";
+import { getVehicles, updateVehicle, deleteVehicle } from "../../../src/services/storage/vehicles";\nimport { useAppLanguage } from "../../../src/services/i18n";
 import type { MileageEntry, Vehicle, Driver } from "../../../src/types";
 
-export default function SettingsScreen() {
+export default function SettingsScreen() {\n  const { setAppLanguage } = useAppLanguage();
   const { t } = useAppLanguage();
   const params = useLocalSearchParams<{ vehicleId: string | string[] }>();
   const vehicleId = Array.isArray(params.vehicleId) ? params.vehicleId[0] : params.vehicleId;
