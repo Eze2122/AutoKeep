@@ -204,7 +204,7 @@ const translations: Record<string, string> = {
   "Ej. Seguro La Caja": "E.g. La Caja insurance",
   "Todavía no hay documentos registrados.": "No documents registered yet.",
   "Eliminar vehículo": "Remove vehicle",
-  "La preferencia se guarda en el dispositivo. La traducción completa se implementará en una etapa posterior.": "Language preference is saved on this device.",
+  "La preferencia se guarda en el dispositivo.": "Language preference is saved on this device.",
   "¿Eliminar vehículo": "Remove vehicle",
   "¿Eliminar": "Delete",
   "Español": "Spanish",
@@ -212,6 +212,10 @@ const translations: Record<string, string> = {
   "No se pudieron cargar los vehículos.": "Could not load vehicles.",
   "Choferes:": "Drivers:",
   "Vehículo: ": "Vehicle: ",
+  "Ej. Volkswagen Polo Track": "E.g. Volkswagen Polo Track",
+  "Ej. AB123CD": "E.g. AB123CD",
+  "Cada ": "Every ",
+  " h": " h",
 };
 export function translate(text: string, language: AppLanguage): string {
   return language === "en" ? (translations[text] ?? text) : text;
