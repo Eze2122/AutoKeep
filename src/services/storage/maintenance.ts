@@ -19,7 +19,7 @@ export async function addMileageEntry(entry: MileageEntry): Promise<void> {
   const entries = await getMileageEntries(entry.vehicleId);
   await AsyncStorage.setItem(mileageKey(entry.vehicleId), JSON.stringify([...entries, entry].sort((a,b) => a.recordedAt.localeCompare(b.recordedAt))));
 }
-export async function deleteMileageEntry(vehicleId: string, entryId: string): Promise<void> {
+export async function updateMileageEntry(entry: MileageEntry): Promise<void> {\n  const entries = await getMileageEntries(entry.vehicleId);\n  if (!entries.some(item => item.id === entry.id)) throw new Error("MILEAGE_ENTRY_NOT_FOUND");\n  const updated = entries.map(item => item.id === entry.id ? entry : item).sort((a,b) => a.recordedAt.localeCompare(b.recordedAt));\n  await AsyncStorage.setItem(mileageKey(entry.vehicleId), JSON.stringify(updated));\n}\nexport async function deleteMileageEntry(vehicleId: string, entryId: string): Promise<void> {
   const entries = await getMileageEntries(vehicleId);
   await AsyncStorage.setItem(mileageKey(vehicleId), JSON.stringify(entries.filter(entry => entry.id !== entryId)));
 }
