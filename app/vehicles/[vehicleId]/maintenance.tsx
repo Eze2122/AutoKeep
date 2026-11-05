@@ -1,7 +1,7 @@
 import { useLocalSearchParams, router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { Alert, ScrollView, Text, TextInput, View, Pressable, StyleSheet, Switch, ActivityIndicator } from "react-native";
-import { addMileageEntry, deleteMileageEntry, getMileageEntries, getMaintenanceSettings, saveMaintenanceSettings, defaultMaintenanceSettings, type MaintenanceSettings } from "../../../src/services/storage/maintenance";
+import { addMileageEntry, updateMileageEntry, deleteMileageEntry, getMileageEntries, getMaintenanceSettings, saveMaintenanceSettings, defaultMaintenanceSettings, type MaintenanceSettings } from "../../../src/services/storage/maintenance";
 import type { MileageEntry } from "../../../src/types";
 import { cancelLocalNotification, scheduleMileageReminder } from "../../../src/services/notifications";
 
@@ -10,7 +10,7 @@ export default function MaintenanceScreen() {
   const vehicleId = Array.isArray(params.vehicleId) ? params.vehicleId[0] : params.vehicleId;
   const [entries, setEntries] = useState<MileageEntry[]>([]);
   const [settings, setSettings] = useState<MaintenanceSettings>(defaultMaintenanceSettings);
-  const [reading, setReading] = useState("");
+  const [reading, setReading] = useState("");\n  const [editingEntry, setEditingEntry] = useState<MileageEntry | null>(null);
   const [oilReading, setOilReading] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -98,7 +98,7 @@ export default function MaintenanceScreen() {
         <View style={styles.switchRow}><Text style={styles.label}>Alertas de kilometraje</Text><Switch value={settings.mileageAlertsEnabled} onValueChange={(value) => changeSettings({ ...settings, mileageAlertsEnabled: value })} trackColor={{ true: "#137C70" }} /></View>
         <Text style={styles.label}>Odómetro actual (km)</Text>
         <TextInput value={reading} onChangeText={setReading} keyboardType="decimal-pad" placeholder="Ej. 253931" style={styles.input}/>
-        <Pressable style={styles.button} onPress={recordMileage}><Text style={styles.buttonText}>Guardar kilometraje</Text></Pressable>
+        <Pressable style={styles.button} onPress={recordMileage}><Text style={styles.buttonText}>{editingEntry ? "Actualizar lectura" : "Guardar kilometraje"}</Text></Pressable>\n        {editingEntry && <Pressable style={styles.back} onPress={() => { setEditingEntry(null); setReading(""); }}><Text style={styles.backText}>Cancelar edición</Text></Pressable>}
         <View style={styles.metric}><Text style={styles.metricLabel}>Última lectura</Text><Text style={styles.metricValue}>{latest ? `${latest.odometerKm.toLocaleString("es-AR")} km` : "Sin registros"}</Text></View>
         <View style={styles.metric}><Text style={styles.metricLabel}>Km recorridos desde registro anterior</Text><Text style={styles.metricValue}>{driven === null ? "Necesitás 2 registros" : `${driven.toLocaleString("es-AR")} km`}</Text></View>
         {latest && <Text style={styles.caption}>Último registro: {new Date(latest.recordedAt).toLocaleString("es-AR")}</Text>}
@@ -108,7 +108,7 @@ export default function MaintenanceScreen() {
             <Text style={styles.metricValue}>{entry.odometerKm.toLocaleString("es-AR")} km</Text>
             <Text style={styles.caption}>{new Date(entry.recordedAt).toLocaleString("es-AR")}</Text>
           </View>
-          <Pressable onPress={() => confirmDeleteMileage(entry)} style={styles.deleteButton}><Text style={styles.deleteText}>Eliminar</Text></Pressable>
+          <View style={{ flexDirection: "row" }}><Pressable onPress={() => { setEditingEntry(entry); setReading(String(entry.odometerKm)); }} style={styles.deleteButton}><Text style={{ color: "#137C70", fontWeight: "700" }}>Editar</Text></Pressable><Pressable onPress={() => confirmDeleteMileage(entry)} style={styles.deleteButton}><Text style={styles.deleteText}>Eliminar</Text></Pressable></View>
         </View>)}
       </View>
 
