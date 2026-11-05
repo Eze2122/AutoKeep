@@ -1,7 +1,6 @@
 import { useLocalSearchParams, router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { Alert, ScrollView, Text, View, Pressable, StyleSheet, TextInput } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getMileageEntries } from "../../../src/services/storage/maintenance";
 import { getVehicles, updateVehicle, deleteVehicle } from "../../../src/services/storage/vehicles";
 import { useAppLanguage } from "../../../src/services/i18n";
@@ -40,7 +39,7 @@ export default function SettingsScreen() {
     }
     load().catch(() => Alert.alert(t("Error"), t("No se pudo cargar la configuración.")));
     return () => { active = false; };
-  }, [vehicleId]));
+  }, [vehicleId, t]));
 
   async function changeLanguage(next: "es" | "en") {
     setLanguage(next);
