@@ -10,11 +10,18 @@ export const defaultMaintenanceSettings: MaintenanceSettings = { mileageReminder
 export async function getMileageEntries(vehicleId: string): Promise<MileageEntry[]> {
   const raw = await AsyncStorage.getItem(mileageKey(vehicleId));
   if (!raw) return [];
-  try { return JSON.parse(raw) as MileageEntry[]; } catch { return []; }
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed as MileageEntry[] : [];
+  } catch { return []; }
 }
 export async function addMileageEntry(entry: MileageEntry): Promise<void> {
   const entries = await getMileageEntries(entry.vehicleId);
   await AsyncStorage.setItem(mileageKey(entry.vehicleId), JSON.stringify([...entries, entry].sort((a,b) => a.recordedAt.localeCompare(b.recordedAt))));
+}
+export async function deleteMileageEntry(vehicleId: string, entryId: string): Promise<void> {
+  const entries = await getMileageEntries(vehicleId);
+  await AsyncStorage.setItem(mileageKey(vehicleId), JSON.stringify(entries.filter(entry => entry.id !== entryId)));
 }
 export async function getMaintenanceSettings(vehicleId: string): Promise<MaintenanceSettings> {
   const raw = await AsyncStorage.getItem(settingsKey(vehicleId));
