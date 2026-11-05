@@ -116,7 +116,7 @@ const translations: Record<string, string> = {
   "Cédula verde o azul":"Vehicle registration",
   "Otro documento":"Other document",
   "Permiso de transporte (aplicación)":"Ride-hailing permit",
-  "Permiso de transporte (turismo)":"Tourism transport permit"
+  "Permiso de transporte (turismo)":"Tourism transport permit",
   "Your vehicle's records are linked to this vehicle.": "Records are linked to this vehicle.",
   "Los registros quedan vinculados a este vehículo.": "Records are linked to this vehicle.",
   "Guardá los documentos y controlá sus vencimientos.": "Save documents and track expiration dates.",
@@ -296,6 +296,21 @@ const translations: Record<string, string> = {
   " días antes": " days before",
   "Eliminar vehículo": "Remove vehicle",
   "La preferencia se guarda en el dispositivo. La traducción completa se implementará en una etapa posterior.": "Language preference is saved on this device.",
+  "La preferencia se guarda en el dispositivo. La traducción completa se implementará en una etapa posterior.": "Language preference is saved on this device.",
+  "¿Eliminar vehículo": "Remove vehicle",
+  "No se pudo cargar la configuración.": "Could not load settings.",
+  "¿Eliminar": "Delete",
+  "Español": "Spanish",
+  "Preference: English. Note: translations will be applied progressively.": "Preference: English.",
+  "No se pudieron cargar los documentos.": "Could not load documents.",
+  "No se pudo cargar la línea de tiempo del vehículo.": "Could not load the vehicle timeline.",
+  "No se pudo eliminar la lectura.": "Could not delete the reading.",
+  "No se pudo eliminar el registro.": "Could not delete the record.",
+  "No se pudo eliminar el documento.": "Could not delete the document.",
+  "No se pudieron cargar los vehículos.": "Could not load vehicles.",
+  "Choferes:": "Drivers:",
+  "Sin choferes": "No drivers",
+  "Vehículo: ": "Vehicle: ",
 };
 export function translate(text: string, language: AppLanguage): string {
   return language === "en" ? (translations[text] ?? text) : text;
