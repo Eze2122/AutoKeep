@@ -1,22 +1,123 @@
-import { useLocalSearchParams, router } from "expo-router";
-import { Text, View, Pressable, StyleSheet } from "react-native";
+import { useLocalSearchParams, router, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
+import { Alert, Image, ScrollView, Text, TextInput, View, Pressable, StyleSheet, ActivityIndicator } from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import type { DocumentKind, VehicleDocument } from "../../../src/types";
+import { addVehicleDocument, deleteVehicleDocument, getVehicleDocuments } from "../../../src/services/storage/documents";
+
+const kinds: DocumentKind[] = ["Permiso de transporte (aplicación)", "Permiso de transporte (turismo)", "RTO", "Seguro", "Pago de patente", "Cédula de GNC", "Cédula verde o azul", "Otro documento"];
+const alertOptions = [1, 3, 7, 15, 30];
 
 export default function DocumentsScreen() {
-  const { vehicleId } = useLocalSearchParams<{ vehicleId: string }>();
-  return <View style={styles.container}>
+  const params = useLocalSearchParams<{ vehicleId: string | string[] }>();
+  const vehicleId = Array.isArray(params.vehicleId) ? params.vehicleId[0] : params.vehicleId;
+  const [documents, setDocuments] = useState<VehicleDocument[]>([]);
+  const [kind, setKind] = useState<DocumentKind>(kinds[0]);
+  const [customName, setCustomName] = useState("");
+  const [expiry, setExpiry] = useState("");
+  const [alertDays, setAlertDays] = useState(7);
+  const [photoUri, setPhotoUri] = useState<string | undefined>();
+  const [loading, setLoading] = useState(true);
+
+  const refresh = useCallback(async () => {
+    if (!vehicleId) return;
+    try { setDocuments(await getVehicleDocuments(vehicleId)); }
+    catch { Alert.alert("Error", "No se pudieron cargar los documentos."); }
+    finally { setLoading(false); }
+  }, [vehicleId]);
+  useFocusEffect(useCallback(() => { refresh(); }, [refresh]));
+
+  async function pickPhoto() {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) { Alert.alert("Permiso requerido", "Permití el acceso a las fotos para adjuntar una imagen del documento."); return; }
+    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], allowsEditing: true, quality: 0.75 });
+    if (!result.canceled && result.assets[0]) setPhotoUri(result.assets[0].uri);
+  }
+
+  async function saveDocument() {
+    if (!vehicleId) return;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(expiry) || Number.isNaN(Date.parse(expiry))) {
+      Alert.alert("Fecha inválida", "Ingresá la fecha con formato AAAA-MM-DD. Ejemplo: 2027-04-22."); return;
+    }
+    try {
+      const doc: VehicleDocument = { id: `doc-${Date.now()}`, vehicleId, kind, customName: customName.trim() || undefined, expiresAt: expiry, alertDays, photoUri };
+      await addVehicleDocument(doc);
+      setCustomName(""); setExpiry(""); setPhotoUri(undefined); setAlertDays(7); await refresh();
+      Alert.alert("Documento guardado", "Se guardó en la documentación de este vehículo.");
+    } catch { Alert.alert("Error", "No se pudo guardar el documento."); }
+  }
+
+  function removeDocument(doc: VehicleDocument) {
+    Alert.alert("Eliminar documento", `¿Querés eliminar “${doc.customName || doc.kind}”?`, [
+      { text: "Cancelar", style: "cancel" },
+      { text: "Eliminar", style: "destructive", onPress: async () => { if (vehicleId) { await deleteVehicleDocument(vehicleId, doc.id); await refresh(); } } }
+    ]);
+  }
+
+  function status(expiresAt: string) {
+    const days = Math.ceil((new Date(`${expiresAt}T23:59:59`).getTime() - Date.now()) / 86400000);
+    if (days < 0) return `Vencido hace ${Math.abs(days)} día(s)`;
+    if (days === 0) return "Vence hoy";
+    return `Vence en ${days} día(s)`;
+  }
+
+  return <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
     <Text style={styles.brand}>AutoKeep</Text>
     <Text style={styles.title}>Documentación</Text>
-    <Text style={styles.caption}>Vehículo: {vehicleId}</Text>
-    <Text style={styles.body}>Documentos del vehículo, fotos y fechas de vencimiento. Esta sección se implementará en el siguiente paso.</Text>
-    <Pressable style={styles.button} onPress={() => router.back()}><Text style={styles.buttonText}>Volver</Text></Pressable>
-  </View>;
+    <Text style={styles.caption}>Guardá los documentos y controlá sus vencimientos.</Text>
+    <View style={styles.card}>
+      <Text style={styles.sectionTitle}>＋ Agregar documento</Text>
+      <Text style={styles.label}>Tipo de documento</Text>
+      <View style={styles.kindList}>{kinds.map((item) => <Pressable key={item} onPress={() => setKind(item)} style={[styles.kindChoice, kind === item && styles.selected]}><Text style={[styles.kindText, kind === item && styles.selectedText]}>{item}</Text></Pressable>)}</View>
+      <Text style={styles.label}>Nombre personalizado (opcional)</Text>
+      <TextInput value={customName} onChangeText={setCustomName} placeholder="Ej. Seguro La Caja" style={styles.input}/>
+      <Text style={styles.label}>Fecha de vencimiento (AAAA-MM-DD)</Text>
+      <TextInput value={expiry} onChangeText={setExpiry} placeholder="2027-04-22" keyboardType="numbers-and-punctuation" style={styles.input}/>
+      <Text style={styles.label}>Avisar antes del vencimiento</Text>
+      <View style={styles.row}>{alertOptions.map((days) => <Pressable key={days} onPress={() => setAlertDays(days)} style={[styles.alertChoice, alertDays === days && styles.selected]}><Text style={[styles.kindText, alertDays === days && styles.selectedText]}>{days} d</Text></Pressable>)}</View>
+      <Pressable style={styles.photoButton} onPress={pickPhoto}><Text style={styles.photoText}>{photoUri ? "Cambiar foto adjunta" : "📷 Adjuntar foto del documento"}</Text></Pressable>
+      {photoUri && <Image source={{ uri: photoUri }} style={styles.preview} resizeMode="contain" />}
+      <Pressable style={styles.button} onPress={saveDocument}><Text style={styles.buttonText}>Guardar documento</Text></Pressable>
+    </View>
+    <Text style={styles.listTitle}>Documentos guardados</Text>
+    {loading ? <ActivityIndicator color="#137C70" style={{ marginTop: 18 }} /> : documents.length === 0 ? <Text style={styles.caption}>Todavía no hay documentos registrados.</Text> : documents.map((doc) => <View key={doc.id} style={styles.savedCard}>
+      <Text style={styles.savedTitle}>{doc.customName || doc.kind}</Text>
+      {doc.customName && <Text style={styles.caption}>{doc.kind}</Text>}
+      <Text style={styles.savedDate}>Vencimiento: {doc.expiresAt} · {status(doc.expiresAt)}</Text>
+      <Text style={styles.caption}>Alerta configurada: {doc.alertDays} días antes</Text>
+      {doc.photoUri && <Image source={{ uri: doc.photoUri }} style={styles.preview} resizeMode="contain" />}
+      <Pressable style={styles.deleteButton} onPress={() => removeDocument(doc)}><Text style={styles.deleteText}>Eliminar documento</Text></Pressable>
+    </View>)}
+    <Pressable style={styles.back} onPress={() => router.back()}><Text style={styles.backText}>Volver al vehículo</Text></Pressable>
+  </ScrollView>;
 }
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 24, paddingTop: 50, backgroundColor: "#F4F8F7" },
+  container: { flexGrow: 1, padding: 20, paddingTop: 48, paddingBottom: 35, backgroundColor: "#F4F8F7" },
   brand: { fontSize: 24, fontWeight: "800", color: "#137C70" },
-  title: { fontSize: 28, fontWeight: "800", color: "#20312F", marginTop: 22 },
-  caption: { color: "#71817D", marginTop: 8 },
-  body: { color: "#61716E", lineHeight: 23, marginTop: 22 },
-  button: { backgroundColor: "#137C70", padding: 16, borderRadius: 14, marginTop: 24, alignItems: "center" },
-  buttonText: { color: "#FFFFFF", fontWeight: "700" }
+  title: { fontSize: 28, fontWeight: "800", color: "#20312F", marginTop: 18 },
+  caption: { color: "#71817D", lineHeight: 20, marginTop: 6, fontSize: 13 },
+  card: { backgroundColor: "#FFFFFF", borderRadius: 20, padding: 18, marginTop: 18 },
+  sectionTitle: { fontSize: 18, fontWeight: "800", color: "#20312F" },
+  label: { color: "#20312F", fontWeight: "700", marginTop: 15, marginBottom: 8 },
+  kindList: { gap: 8 },
+  kindChoice: { borderWidth: 1, borderColor: "#DDE8E5", borderRadius: 11, padding: 12, backgroundColor: "#FAFCFB" },
+  selected: { borderColor: "#137C70", backgroundColor: "#E5F4F1" },
+  kindText: { color: "#61716E", fontWeight: "600", fontSize: 13 },
+  selectedText: { color: "#137C70", fontWeight: "800" },
+  input: { backgroundColor: "#FFFFFF", borderColor: "#DDE8E5", borderWidth: 1, borderRadius: 13, padding: 14, color: "#20312F" },
+  row: { flexDirection: "row", gap: 6 },
+  alertChoice: { flex: 1, borderWidth: 1, borderColor: "#DDE8E5", borderRadius: 10, padding: 10, alignItems: "center" },
+  photoButton: { borderWidth: 1, borderColor: "#137C70", borderRadius: 12, padding: 14, alignItems: "center", marginTop: 18 },
+  photoText: { color: "#137C70", fontWeight: "700" },
+  preview: { width: "100%", height: 180, marginTop: 12, borderRadius: 12 },
+  button: { backgroundColor: "#137C70", padding: 15, borderRadius: 13, marginTop: 16, alignItems: "center" },
+  buttonText: { color: "#FFFFFF", fontWeight: "700" },
+  listTitle: { fontSize: 20, fontWeight: "800", color: "#20312F", marginTop: 25 },
+  savedCard: { backgroundColor: "#FFFFFF", borderRadius: 16, padding: 16, marginTop: 12 },
+  savedTitle: { fontSize: 16, fontWeight: "800", color: "#20312F" },
+  savedDate: { color: "#20312F", marginTop: 8, fontSize: 13, fontWeight: "600" },
+  deleteButton: { alignSelf: "flex-start", padding: 10, marginTop: 8 },
+  deleteText: { color: "#B42318", fontWeight: "700" },
+  back: { padding: 15, alignItems: "center", marginTop: 10 },
+  backText: { color: "#61716E", fontWeight: "700" }
 });
