@@ -59,13 +59,24 @@ export default function MaintenanceScreen() {
       Alert.alert(t("Kilometraje inválido"), t("Ingresá un odómetro válido en kilómetros."));
       return;
     }
-    if (latest && value < latest.odometerKm) {
+    if (!editingEntry && latest && value < latest.odometerKm) {
       Alert.alert(t("Lectura menor"), t("El nuevo kilometraje no puede ser menor que el último registrado."));
       return;
     }
-    const entry: MileageEntry = { id: `mile-${Date.now()}`, vehicleId, odometerKm: value, recordedAt: new Date().toISOString() };
-    try { await addMileageEntry(entry); setReading(""); await refresh(); Alert.alert(t("Registro guardado"), t("Se guardó el kilometraje con fecha y hora.")); }
-    catch { Alert.alert(t("Error"), t("No se pudo guardar el registro.")); }
+    const entry: MileageEntry = {
+      id: editingEntry?.id ?? `mile-${Date.now()}`,
+      vehicleId,
+      odometerKm: value,
+      recordedAt: editingEntry?.recordedAt ?? new Date().toISOString()
+    };
+    try {
+      if (editingEntry) await updateMileageEntry(entry);
+      else await addMileageEntry(entry);
+      setReading("");
+      setEditingEntry(null);
+      await refresh();
+      Alert.alert(t(editingEntry ? "Lectura actualizada" : "Registro guardado"), t(editingEntry ? "Se actualizó la lectura del odómetro." : "Se guardó el kilometraje con fecha y hora."));
+    } catch { Alert.alert(t("Error"), t("No se pudo guardar el registro.")); }
   }
 
   function confirmDeleteMileage(entry: MileageEntry) {
