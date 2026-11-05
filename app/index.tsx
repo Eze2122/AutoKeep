@@ -5,6 +5,7 @@ import { getVehicles } from "../src/services/storage/vehicles";
 import type { Vehicle } from "../src/types";
 
 export default function HomeScreen() {
+  const { t } = useAppLanguage();
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -20,16 +21,16 @@ export default function HomeScreen() {
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.header}>
         <Text style={styles.brand}>AutoKeep</Text>
-        <Text style={styles.subtitle}>Tu vehículo, siempre al día.</Text>
+        <Text style={styles.subtitle}>{t("Tu vehículo, siempre al día.")}</Text>
       </View>
-      <Text style={styles.title}>Mi flota</Text>
-      <Text style={styles.helper}>Seleccioná un vehículo para gestionar su mantenimiento y documentación.</Text>
+      <Text style={styles.title}>{t("Mi flota")}</Text>
+      <Text style={styles.helper}>{t("Seleccioná un vehículo para gestionar su mantenimiento y documentación.")}</Text>
       {loading ? <ActivityIndicator style={{ marginTop: 28 }} color="#137C70" size="large" /> :
       vehicles.length === 0 ? (
         <View style={styles.empty}>
           <Text style={styles.car}>🚘</Text>
-          <Text style={styles.emptyTitle}>Todavía no hay vehículos</Text>
-          <Text style={styles.helper}>Agregá el primero para empezar a llevar su control.</Text>
+          <Text style={styles.emptyTitle}>{t("Todavía no hay vehículos")}</Text>
+          <Text style={styles.helper}>{t("Agregá el primero para empezar a llevar su control.")}</Text>
         </View>
       ) : vehicles.map((vehicle) => (
         <Link key={vehicle.id} href={`/vehicles/${vehicle.id}`} asChild>
@@ -41,7 +42,7 @@ export default function HomeScreen() {
         </Link>
       ))}
       <Link href="/vehicles/new" asChild>
-        <Pressable style={styles.add}><Text style={styles.addText}>＋ Agregar vehículo</Text></Pressable>
+        <Pressable style={styles.add}><Text style={styles.addText}>{t("＋ Agregar vehículo")}</Text></Pressable>
       </Link>
     </ScrollView>
   );
