@@ -5,6 +5,7 @@ import { getMileageEntries } from "../../../src/services/storage/maintenance";
 import { getServiceRecords, type ServiceRecord } from "../../../src/services/storage/service-records";
 import type { MileageEntry } from "../../../src/types";
 
+import { useAppLanguage } from "../../../src/services/i18n";
 type TimelineItem =
   | { id: string; type: "mileage"; date: string; km: number }
   | { id: string; type: "service"; date: string; record: ServiceRecord };
