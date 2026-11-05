@@ -4,7 +4,7 @@ import type { MileageEntry } from "../types";
 const mileageKey = (vehicleId: string) => `@autokeep/mileage/${vehicleId}`;
 const settingsKey = (vehicleId: string) => `@autokeep/maintenance-settings/${vehicleId}`;
 
-export type MaintenanceSettings = { mileageReminderHours: 12 | 24; mileageAlertsEnabled: boolean; oilIntervalKm: 8000 | 13000; lastOilChangeKm: number | null };
+export type MaintenanceSettings = { mileageReminderHours: 12 | 24; mileageAlertsEnabled: boolean; oilIntervalKm: 8000 | 13000; lastOilChangeKm: number | null; mileageNotificationId?: string };
 export const defaultMaintenanceSettings: MaintenanceSettings = { mileageReminderHours: 12, mileageAlertsEnabled: true, oilIntervalKm: 8000, lastOilChangeKm: null };
 
 export async function getMileageEntries(vehicleId: string): Promise<MileageEntry[]> {
