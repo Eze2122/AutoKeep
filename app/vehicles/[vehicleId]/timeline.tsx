@@ -33,15 +33,15 @@ export default function VehicleTimelineScreen() {
   return <ScrollView contentContainerStyle={styles.container}>
     <Text style={styles.brand}>AutoKeep</Text>
     <Text style={styles.title}>{t("Historial unificado")}</Text>
-    <Text style={styles.caption}>Kilometraje y servicios, ordenados del más reciente al más antiguo. Todo está asociado al vehículo.</Text>
+    <Text style={styles.caption}>{t("Kilometraje y servicios, ordenados del más reciente al más antiguo. Todo está asociado al vehículo.")}</Text>
     <View style={styles.card}>
-      <Text style={styles.sectionTitle}>Actividad ({items.length})</Text>
-      {!items.length ? <Text style={styles.caption}>Todavía no hay registros. Cargá kilometraje o servicios para verlos acá.</Text> : items.map((item) => <View key={item.id} style={styles.entry}>
+      <Text style={styles.sectionTitle}>{t("Actividad")} ({items.length})</Text>
+      {!items.length ? <Text style={styles.caption}>{t("Todavía no hay registros. Cargá kilometraje o servicios para verlos acá.")}</Text> : items.map((item) => <View key={item.id} style={styles.entry}>
         <View style={styles.marker}><Text>{item.type === "mileage" ? "📍" : "🛠️"}</Text></View>
         <View style={{ flex: 1 }}>
-          <Text style={styles.entryTitle}>{item.type === "mileage" ? "Lectura de odómetro" : item.record.title}</Text>
+          <Text style={styles.entryTitle}>{item.type === "mileage" ? t("Lectura de odómetro") : item.record.title}</Text>
           <Text style={styles.caption}>{new Date(item.date).toLocaleString("es-AR")}</Text>
-          <Text style={styles.detail}>{item.type === "mileage" ? `${item.km.toLocaleString("es-AR")} km` : `${item.record.odometerKm.toLocaleString("es-AR")} km · ${item.record.category === "custom" ? "Otro" : item.record.category === "oil" ? "Aceite" : item.record.category === "filters" ? "Filtros" : item.record.category === "brakes" ? "Frenos" : item.record.category === "tires" ? "Neumáticos" : "Motor"}${item.record.cost !== undefined ? ` · $${item.record.cost.toLocaleString("es-AR")}` : ""}`}</Text>
+          <Text style={styles.detail}>{item.type === "mileage" ? `${item.km.toLocaleString("es-AR")} km` : `${item.record.odometerKm.toLocaleString("es-AR")} km · ${item.record.category === "custom" ? t("Otro") : item.record.category === "oil" ? t("Aceite") : item.record.category === "filters" ? "Filtros" : item.record.category === "brakes" ? "Frenos" : item.record.category === "tires" ? "Neumáticos" : "Motor"}${item.record.cost !== undefined ? ` · $${item.record.cost.toLocaleString("es-AR")}` : ""}`}</Text>
           {item.type === "service" && item.record.notes ? <Text style={styles.detail}>{item.record.notes}</Text> : null}
         </View>
       </View>)}
