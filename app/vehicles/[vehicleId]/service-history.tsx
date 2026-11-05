@@ -10,6 +10,7 @@ const categories: { value: ServiceRecord["category"]; label: string }[] = [
 ];
 
 export default function ServiceHistoryScreen() {
+  const { t } = useAppLanguage();
   const params = useLocalSearchParams<{ vehicleId: string | string[] }>();
   const vehicleId = Array.isArray(params.vehicleId) ? params.vehicleId[0] : params.vehicleId;
   const [records, setRecords] = useState<ServiceRecord[]>([]);
@@ -60,18 +61,18 @@ export default function ServiceHistoryScreen() {
     <Text style={styles.title}>Historial de mantenimiento</Text>
     <Text style={styles.caption}>Cada servicio queda asociado al vehículo, no al conductor.</Text>
     <View style={styles.card}>
-      <Text style={styles.sectionTitle}>＋ Registrar servicio</Text>
-      <Text style={styles.label}>Tipo</Text>
+      <Text style={styles.sectionTitle}>{t("＋ Registrar servicio")}</Text>
+      <Text style={styles.label}>{t("Tipo")}</Text>
       <View style={styles.categories}>{categories.map(item => <Pressable key={item.value} onPress={() => setCategory(item.value)} style={[styles.category, category === item.value && styles.activeCategory]}><Text style={[styles.categoryText, category === item.value && styles.activeCategoryText]}>{item.label}</Text></Pressable>)}</View>
-      <Text style={styles.label}>Descripción del trabajo</Text>
+      <Text style={styles.label}>{t("Descripción del trabajo")}</Text>
       <TextInput value={title} onChangeText={setTitle} placeholder="Ej. Cambio de aceite y filtro" style={styles.input}/>
-      <Text style={styles.label}>Kilometraje del servicio</Text>
+      <Text style={styles.label}>{t("Kilometraje del servicio")}</Text>
       <TextInput value={km} onChangeText={setKm} keyboardType="decimal-pad" placeholder="Ej. 253000" style={styles.input}/>
-      <Text style={styles.label}>Costo (opcional)</Text>
+      <Text style={styles.label}>{t("Costo (opcional)")}</Text>
       <TextInput value={cost} onChangeText={setCost} keyboardType="decimal-pad" placeholder="ARS" style={styles.input}/>
-      <Text style={styles.label}>Notas (opcional)</Text>
+      <Text style={styles.label}>{t("Notas (opcional)")}</Text>
       <TextInput value={notes} onChangeText={setNotes} multiline placeholder="Repuestos, taller, observaciones…" style={[styles.input, { minHeight: 75 }]}/>
-      <Pressable style={styles.button} onPress={save}><Text style={styles.buttonText}>{editingRecord ? "Actualizar servicio" : "Guardar servicio"}</Text></Pressable>\n      {editingRecord && <Pressable style={styles.back} onPress={() => { setEditingRecord(null); setTitle(""); setKm(""); setCost(""); setNotes(""); setCategory("oil"); }}><Text style={styles.backText}>Cancelar edición</Text></Pressable>}
+      <Pressable style={styles.button} onPress={save}><Text style={styles.buttonText}>{editingRecord ? "Actualizar servicio" : "Guardar servicio"}</Text></Pressable>\n      {editingRecord && <Pressable style={styles.back} onPress={() => { setEditingRecord(null); setTitle(""); setKm(""); setCost(""); setNotes(""); setCategory("oil"); }}><Text style={styles.backText}>{t("Cancelar edición")}</Text></Pressable>}
     </View>
     <View style={styles.card}>
       <Text style={styles.sectionTitle}>📚 Servicios anteriores ({records.length})</Text>
@@ -82,10 +83,10 @@ export default function ServiceHistoryScreen() {
           <Text style={styles.caption}>{new Date(record.performedAt).toLocaleString("es-AR")}{record.cost !== undefined ? ` · $${record.cost.toLocaleString("es-AR")}` : ""}</Text>
           {record.notes ? <Text style={styles.notes}>{record.notes}</Text> : null}
         </View>
-        <View><Pressable onPress={() => { setEditingRecord(record); setTitle(record.title); setCategory(record.category); setKm(String(record.odometerKm)); setCost(record.cost === undefined ? "" : String(record.cost)); setNotes(record.notes ?? ""); }} style={styles.delete}><Text style={{ color: "#137C70", fontWeight: "700" }}>Editar</Text></Pressable><Pressable onPress={() => confirmDelete(record)} style={styles.delete}><Text style={styles.deleteText}>Eliminar</Text></Pressable></View>
+        <View><Pressable onPress={() => { setEditingRecord(record); setTitle(record.title); setCategory(record.category); setKm(String(record.odometerKm)); setCost(record.cost === undefined ? "" : String(record.cost)); setNotes(record.notes ?? ""); }} style={styles.delete}><Text style={{ color: "#137C70", fontWeight: "700" }}>{t("Editar")}</Text></Pressable><Pressable onPress={() => confirmDelete(record)} style={styles.delete}><Text style={styles.deleteText}>{t("Eliminar")}</Text></Pressable></View>
       </View>)}
     </View>
-    <Pressable style={styles.back} onPress={() => router.back()}><Text style={styles.backText}>Volver al vehículo</Text></Pressable>
+    <Pressable style={styles.back} onPress={() => router.back()}><Text style={styles.backText}>{t("Volver al vehículo")}</Text></Pressable>
   </ScrollView>;
 }
 
