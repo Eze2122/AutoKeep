@@ -8,7 +8,6 @@ import { useAppLanguage } from "../../../src/services/i18n";
 import type { MileageEntry, Vehicle, Driver } from "../../../src/types";
 
 export default function SettingsScreen() {
-  const { setAppLanguage } = useAppLanguage();
   const { t } = useAppLanguage();
   const params = useLocalSearchParams<{ vehicleId: string | string[] }>();
   const vehicleId = Array.isArray(params.vehicleId) ? params.vehicleId[0] : params.vehicleId;
@@ -46,8 +45,8 @@ export default function SettingsScreen() {
   async function changeLanguage(next: "es" | "en") {
     setLanguage(next);
     try { await AsyncStorage.setItem("@autokeep/language", next); }
-    catch { Alert.alert("Error", "No se pudo guardar el idioma."); return; }
-    Alert.alert("Idioma guardado", next === "es" ? "Preferencia: Español." : "Preference: English. Note: translations will be applied progressively.");
+    catch { Alert.alert(t("Error"), t("No se pudo guardar el idioma.")); return; }
+    Alert.alert(t("Idioma guardado"), t(next === "es" ? "Preferencia: Español." : "Preference: English. Note: translations will be applied progressively."));
   }
 
   async function handleSaveVehicle() {
@@ -56,7 +55,7 @@ export default function SettingsScreen() {
     const cleanPlate = plate.trim().toUpperCase();
     const cleanDrivers = drivers.map(d => ({ ...d, name: d.name.trim() })).filter(d => d.name.length > 0);
     if (!cleanModel || !cleanPlate) {
-      Alert.alert("Datos incompletos", "Ingresá modelo y patente.");
+      Alert.alert(t("Datos incompletos"), t("Ingresá modelo y patente."));
       return;
     }
     setSavingVehicle(true);
@@ -65,9 +64,9 @@ export default function SettingsScreen() {
       await updateVehicle(updated);
       setVehicle(updated);
       setDrivers(cleanDrivers);
-      Alert.alert("Guardado", "Los datos del vehículo y sus choferes se actualizaron.");
+      Alert.alert(t("Guardado"), t("Los datos del vehículo y sus choferes se actualizaron."));
     } catch (error) {
-      Alert.alert("No se pudo guardar", error instanceof Error && error.message === "DUPLICATE_PLATE" ? "Ya existe otro vehículo con esa patente." : "Intentá nuevamente.");
+      Alert.alert(t("No se pudo guardar"), t(error instanceof Error && error.message === "DUPLICATE_PLATE" ? "Ya existe otro vehículo con esa patente." : "Intentá nuevamente."));
     } finally { setSavingVehicle(false); }
   }
 
@@ -76,7 +75,7 @@ export default function SettingsScreen() {
   }
 
   function removeDriver(driverId: string) {
-    Alert.alert("Eliminar chofer", "¿Querés quitar este chofer del vehículo?", [
+    Alert.alert(t("Eliminar chofer"), t("¿Querés quitar este chofer del vehículo?"), [
       { text: "Cancelar", style: "cancel" },
       { text: "Eliminar", style: "destructive", onPress: () => setDrivers(current => current.filter(driver => driver.id !== driverId)) }
     ]);
@@ -84,13 +83,13 @@ export default function SettingsScreen() {
 
   function confirmDeleteVehicle() {
     if (!vehicleId) return;
-    Alert.alert("Eliminar vehículo", "Se quitará este vehículo de tu flota. Esta acción no se puede deshacer.", [
+    Alert.alert(t("Eliminar vehículo"), t("Se quitará este vehículo de tu flota. Esta acción no se puede deshacer."), [
       { text: "Cancelar", style: "cancel" },
       { text: "Eliminar", style: "destructive", onPress: async () => {
         try {
           await deleteVehicle(vehicleId);
           router.replace("/");
-        } catch { Alert.alert("Error", "No se pudo eliminar el vehículo."); }
+        } catch { Alert.alert(t("Error"), t("No se pudo eliminar el vehículo.")); }
       }}
     ]);
   }
@@ -102,7 +101,7 @@ export default function SettingsScreen() {
 
     <View style={styles.card}>
       <Text style={styles.sectionTitle}>{t("🚘 Datos del vehículo")}</Text>
-      {!vehicle ? <Text style={styles.caption}>No se encontró el vehículo.</Text> : <>
+      {!vehicle ? <Text style={styles.caption}>{t("No se encontró el vehículo.")}</Text> : <>
         <Text style={styles.fieldLabel}>{t("Modelo")}</Text>
         <TextInput value={model} onChangeText={setModel} placeholder={t("Modelo del vehículo")} style={styles.input} />
         <Text style={styles.fieldLabel}>{t("Patente")}</Text>
@@ -110,13 +109,13 @@ export default function SettingsScreen() {
         <Text style={styles.sectionTitle}>{t("👤 Choferes")}</Text>
         {drivers.map((driver, index) => <View key={driver.id} style={styles.driverRow}>
           <View style={{ flex: 1 }}>
-            <Text style={styles.fieldLabel}>Chofer {index + 1}</Text>
+            <Text style={styles.fieldLabel}>{t("Chofer ")}{index + 1}</Text>
             <TextInput value={driver.name} onChangeText={name => setDrivers(current => current.map(item => item.id === driver.id ? { ...item, name } : item))} placeholder={t("Nombre del chofer")} style={styles.input} />
           </View>
           <Pressable style={styles.removeDriver} onPress={() => removeDriver(driver.id)}><Text style={styles.removeText}>{t("Quitar")}</Text></Pressable>
         </View>)}
         <Pressable style={styles.addDriver} onPress={addDriver}><Text style={styles.addDriverText}>{t("＋ Agregar chofer")}</Text></Pressable>
-        <Pressable disabled={savingVehicle} style={[styles.saveButton, savingVehicle && { opacity: 0.6 }]} onPress={handleSaveVehicle}><Text style={styles.saveButtonText}>{savingVehicle ? "Guardando…" : "Guardar cambios"}</Text></Pressable>
+        <Pressable disabled={savingVehicle} style={[styles.saveButton, savingVehicle && { opacity: 0.6 }]} onPress={handleSaveVehicle}><Text style={styles.saveButtonText}>{savingVehicle ? t("Guardando…") : t("Guardar cambios")}</Text></Pressable>
         <Pressable style={styles.deleteVehicle} onPress={confirmDeleteVehicle}><Text style={styles.deleteText}>{t("Eliminar vehículo de la flota")}</Text></Pressable>
       </>}
     </View>
@@ -127,7 +126,7 @@ export default function SettingsScreen() {
         <Pressable style={[styles.choice, language === "es" && styles.selected]} onPress={() => changeLanguage("es")}><Text style={[styles.choiceText, language === "es" && styles.selectedText]}>Español</Text></Pressable>
         <Pressable style={[styles.choice, language === "en" && styles.selected]} onPress={() => changeLanguage("en")}><Text style={[styles.choiceText, language === "en" && styles.selected && styles.selectedText]}>English</Text></Pressable>
       </View>
-      <Text style={styles.caption}>La preferencia se guarda en el dispositivo. La traducción completa se implementará en una etapa posterior.</Text>
+      <Text style={styles.caption}>{t("La preferencia se guarda en el dispositivo. La traducción completa se implementará en una etapa posterior.")}</Text>
     </View>
     <View style={styles.card}>
       <Text style={styles.sectionTitle}>{t("📚 Historial de kilometraje")}</Text>
