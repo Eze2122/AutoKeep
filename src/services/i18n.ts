@@ -214,6 +214,12 @@ const translations: Record<string, string> = {
   "Vehículo: ": "Vehicle: ",
   "Ej. Volkswagen Polo Track": "E.g. Volkswagen Polo Track",
   "Ej. AB123CD": "E.g. AB123CD",
+  "Lectura actualizada": "Reading updated",
+  "Se actualizó la lectura del odómetro.": "The odometer reading was updated.",
+  "Servicio actualizado": "Service updated",
+  "Se actualizó el registro del servicio.": "The service record was updated.",
+  "Documento actualizado": "Document updated",
+  "Se actualizaron los datos y la alerta del documento.": "The document details and reminder were updated.",
   "Cada ": "Every ",
 };
 export function translate(text: string, language: AppLanguage): string {
