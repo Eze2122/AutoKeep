@@ -5,7 +5,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getMileageEntries } from "../../../src/services/storage/maintenance";
 import type { MileageEntry } from "../../../src/types";
 
-const privacyUrl = "https://github.com/Eze2122/AutoKeep";
 
 export default function SettingsScreen() {
   const params = useLocalSearchParams<{ vehicleId: string | string[] }>();
