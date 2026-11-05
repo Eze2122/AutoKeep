@@ -1,7 +1,7 @@
 import { useLocalSearchParams, router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { Alert, ScrollView, Text, TextInput, View, Pressable, StyleSheet } from "react-native";
-import { addServiceRecord, deleteServiceRecord, getServiceRecords, type ServiceRecord } from "../../../src/services/storage/service-records";
+import { addServiceRecord, updateServiceRecord, deleteServiceRecord, getServiceRecords, type ServiceRecord } from "../../../src/services/storage/service-records";
 
 const categories: { value: ServiceRecord["category"]; label: string }[] = [
   { value: "oil", label: "Aceite" }, { value: "filters", label: "Filtros" },
@@ -17,7 +17,7 @@ export default function ServiceHistoryScreen() {
   const [category, setCategory] = useState<ServiceRecord["category"]>("oil");
   const [km, setKm] = useState("");
   const [cost, setCost] = useState("");
-  const [notes, setNotes] = useState("");
+  const [notes, setNotes] = useState("");\n  const [editingRecord, setEditingRecord] = useState<ServiceRecord | null>(null);
 
   const refresh = useCallback(async () => {
     if (vehicleId) setRecords(await getServiceRecords(vehicleId));
@@ -71,7 +71,7 @@ export default function ServiceHistoryScreen() {
       <TextInput value={cost} onChangeText={setCost} keyboardType="decimal-pad" placeholder="ARS" style={styles.input}/>
       <Text style={styles.label}>Notas (opcional)</Text>
       <TextInput value={notes} onChangeText={setNotes} multiline placeholder="Repuestos, taller, observaciones…" style={[styles.input, { minHeight: 75 }]}/>
-      <Pressable style={styles.button} onPress={save}><Text style={styles.buttonText}>Guardar servicio</Text></Pressable>
+      <Pressable style={styles.button} onPress={save}><Text style={styles.buttonText}>{editingRecord ? "Actualizar servicio" : "Guardar servicio"}</Text></Pressable>\n      {editingRecord && <Pressable style={styles.back} onPress={() => { setEditingRecord(null); setTitle(""); setKm(""); setCost(""); setNotes(""); setCategory("oil"); }}><Text style={styles.backText}>Cancelar edición</Text></Pressable>}
     </View>
     <View style={styles.card}>
       <Text style={styles.sectionTitle}>📚 Servicios anteriores ({records.length})</Text>
@@ -82,7 +82,7 @@ export default function ServiceHistoryScreen() {
           <Text style={styles.caption}>{new Date(record.performedAt).toLocaleString("es-AR")}{record.cost !== undefined ? ` · $${record.cost.toLocaleString("es-AR")}` : ""}</Text>
           {record.notes ? <Text style={styles.notes}>{record.notes}</Text> : null}
         </View>
-        <Pressable onPress={() => confirmDelete(record)} style={styles.delete}><Text style={styles.deleteText}>Eliminar</Text></Pressable>
+        <View><Pressable onPress={() => { setEditingRecord(record); setTitle(record.title); setCategory(record.category); setKm(String(record.odometerKm)); setCost(record.cost === undefined ? "" : String(record.cost)); setNotes(record.notes ?? ""); }} style={styles.delete}><Text style={{ color: "#137C70", fontWeight: "700" }}>Editar</Text></Pressable><Pressable onPress={() => confirmDelete(record)} style={styles.delete}><Text style={styles.deleteText}>Eliminar</Text></Pressable></View>
       </View>)}
     </View>
     <Pressable style={styles.back} onPress={() => router.back()}><Text style={styles.backText}>Volver al vehículo</Text></Pressable>
