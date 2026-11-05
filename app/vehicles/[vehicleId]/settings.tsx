@@ -8,7 +8,7 @@ import { useAppLanguage } from "../../../src/services/i18n";
 import type { MileageEntry, Vehicle, Driver } from "../../../src/types";
 
 export default function SettingsScreen() {
-  const { t } = useAppLanguage();
+  const { t, setAppLanguage } = useAppLanguage();
   const params = useLocalSearchParams<{ vehicleId: string | string[] }>();
   const vehicleId = Array.isArray(params.vehicleId) ? params.vehicleId[0] : params.vehicleId;
   const [language, setLanguage] = useState<"es" | "en">("es");
@@ -38,15 +38,15 @@ export default function SettingsScreen() {
         setDrivers(current?.drivers ?? []);
       }
     }
-    load().catch(() => Alert.alert("Error", "No se pudo cargar la configuración."));
+    load().catch(() => Alert.alert(t("Error"), t("No se pudo cargar la configuración.")));
     return () => { active = false; };
   }, [vehicleId]));
 
   async function changeLanguage(next: "es" | "en") {
     setLanguage(next);
-    try { await AsyncStorage.setItem("@autokeep/language", next); }
+    try { await setAppLanguage(next); }
     catch { Alert.alert(t("Error"), t("No se pudo guardar el idioma.")); return; }
-    Alert.alert(t("Idioma guardado"), t(next === "es" ? "Preferencia: Español." : "Preference: English. Note: translations will be applied progressively."));
+    Alert.alert(t("Idioma guardado"), t(next === "es" ? "Preferencia: Español." : "Preference: English."));
   }
 
   async function handleSaveVehicle() {
@@ -76,8 +76,8 @@ export default function SettingsScreen() {
 
   function removeDriver(driverId: string) {
     Alert.alert(t("Eliminar chofer"), t("¿Querés quitar este chofer del vehículo?"), [
-      { text: "Cancelar", style: "cancel" },
-      { text: "Eliminar", style: "destructive", onPress: () => setDrivers(current => current.filter(driver => driver.id !== driverId)) }
+      { text: t("Cancelar"), style: "cancel" },
+      { text: t("Eliminar"), style: "destructive", onPress: () => setDrivers(current => current.filter(driver => driver.id !== driverId)) }
     ]);
   }
 
@@ -126,7 +126,7 @@ export default function SettingsScreen() {
         <Pressable style={[styles.choice, language === "es" && styles.selected]} onPress={() => changeLanguage("es")}><Text style={[styles.choiceText, language === "es" && styles.selectedText]}>Español</Text></Pressable>
         <Pressable style={[styles.choice, language === "en" && styles.selected]} onPress={() => changeLanguage("en")}><Text style={[styles.choiceText, language === "en" && styles.selected && styles.selectedText]}>English</Text></Pressable>
       </View>
-      <Text style={styles.caption}>{t("La preferencia se guarda en el dispositivo. La traducción completa se implementará en una etapa posterior.")}</Text>
+      <Text style={styles.caption}>{t("La preferencia se guarda en el dispositivo.")}</Text>
     </View>
     <View style={styles.card}>
       <Text style={styles.sectionTitle}>{t("📚 Historial de kilometraje")}</Text>
